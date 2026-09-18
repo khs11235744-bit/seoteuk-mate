@@ -801,7 +801,7 @@ setTimeout(()=>{patchActions();patchVersionTexts();bindCategoryEvents();syncCate
 if(window.__SEOTEUK_V29_LOADED__) return;
 window.__SEOTEUK_V29_LOADED__=true;
 
-const VERSION='2.9.0';
+const VERSION='3.0.0';
 const AG_KEY='seoteukMate.antigravityDev.v1';
 const KNOWN_MODELS=[
  ['gemini-3.8-flash-high','Gemini 3.8 Flash (High)'],
@@ -1141,8 +1141,8 @@ function wrapAGFunctions(){
 }
 function patchVersion(){
   const badge=[...document.querySelectorAll('header span')].find(x=>/P\.O\.H\.A\.N\.G 2026/.test(x.textContent||''));
-  if(badge) badge.textContent=`P.O.H.A.N.G 2026 · v${VERSION} AG MODEL + GLOBAL PROGRESS`;
-  document.title=`Seoteuk Mate P.O.H.A.N.G v${VERSION} - AG Model Selector · Global Progress · Evidence Fusion`;
+  if(badge) badge.textContent=`P.O.H.A.N.G 2026 · v${VERSION} CLOUD WORKSPACE + GLOBAL PROGRESS`;
+  document.title=`Seoteuk Mate P.O.H.A.N.G v${VERSION} - Google Cloud · Student Workspace · Analytics · Global Progress`;
 }
 function init(){
   patchVersion();

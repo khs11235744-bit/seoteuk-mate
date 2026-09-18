@@ -1,2 +1,2 @@
-Seoteuk Mate v2.9.0
-Antigravity model selector · actual agy models refresh · global progress coverage
+Seoteuk Mate v3.0.0
+Google/Firebase sign-in wizard · Student/Class Workspace · Student Analytics Dashboard · cloud student records

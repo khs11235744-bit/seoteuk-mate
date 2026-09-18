@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Seoteuk Mate P.O.H.A.N.G v2.9.0 - AG Model Selector · Global Progress · Evidence Fusion</title>
+  <title>Seoteuk Mate P.O.H.A.N.G v3.0.0 - Google Cloud · Student Workspace · Analytics</title>
 
   <meta name="theme-color" content="#2563eb" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -136,7 +136,7 @@
       <div>
         <div class="flex items-center gap-1.5 flex-wrap">
           <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-900">Seoteuk Mate</h1>
-          <span class="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">P.O.H.A.N.G 2026 · v2.9.0 AG MODEL + GLOBAL PROGRESS</span>
+          <span class="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">P.O.H.A.N.G 2026 · v3.0.0 CLOUD WORKSPACE</span>
           <span id="ai-status-badge" class="text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 hidden md:inline-block">
             ⚡ 안티그래비티 패킷 모드
           </span>
@@ -2828,7 +2828,7 @@ window.speakCurrentInterviewQ = function () {
     </div>
     <div class="p-5 space-y-4">
       <div id="cloud-config-warning" class="hidden rounded-2xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 leading-5">
-        Firebase 프로젝트 설정이 아직 없습니다. <b>firebase-config.js</b>에 웹 앱 구성값을 넣으면 로그인과 클라우드 저장이 활성화됩니다. 설정 전에도 로컬 저장 기능은 그대로 사용할 수 있습니다.
+        Firebase 프로젝트 설정이 아직 없습니다. 아래 Google 로그인 버튼을 누르면 앱 안에서 연결 설정을 붙여넣을 수 있습니다. 설정 전에도 로컬 저장 기능은 그대로 사용할 수 있습니다.
       </div>
       <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4">
         <div class="flex items-center gap-3">
@@ -2859,14 +2859,12 @@ window.speakCurrentInterviewQ = function () {
   <div class="w-full max-w-sm rounded-3xl bg-white shadow-2xl p-5">
     <div class="w-12 h-12 mx-auto rounded-2xl bg-blue-600 text-white flex items-center justify-center text-2xl">🎓</div>
     <h3 class="mt-3 text-center font-black text-lg text-slate-900">사용 유형을 선택하세요</h3>
-    <p class="mt-1 text-center text-xs text-slate-500 leading-5">v2에서는 역할을 프로필 표시와 작업공간 설정에 사용합니다. 다른 사용자의 자료를 보는 관리자 권한은 부여하지 않습니다.</p>
+    <p class="mt-1 text-center text-xs text-slate-500 leading-5">역할은 프로필과 기본 화면 구성에만 사용합니다. 다른 사용자의 자료를 보는 관리자 권한은 부여하지 않습니다.</p>
     <div class="grid grid-cols-2 gap-2 mt-5">
-      <button type="button" onclick="window.firebaseUI?.chooseRole?.('teacher')" class="p-4 rounded-2xl border-2 border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-left">
-        <div class="text-2xl">🧑‍🏫</div><div class="font-black mt-1 text-indigo-900">교사</div><div class="text-[10px] text-indigo-700 mt-1">세특 작성·관리 중심</div>
-      </button>
-      <button type="button" onclick="window.firebaseUI?.chooseRole?.('student')" class="p-4 rounded-2xl border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 text-left">
-        <div class="text-2xl">🧑‍🎓</div><div class="font-black mt-1 text-blue-900">학생</div><div class="text-[10px] text-blue-700 mt-1">탐구·면접 연습 중심</div>
-      </button>
+      <button type="button" onclick="window.firebaseUI?.chooseRole?.('teacher')" class="p-4 rounded-2xl border-2 border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-left"><div class="text-2xl">🧑‍🏫</div><div class="font-black mt-1 text-indigo-900">교과교사</div><div class="text-[10px] text-indigo-700 mt-1">교과세특 작성 중심</div></button>
+      <button type="button" onclick="window.firebaseUI?.chooseRole?.('homeroom')" class="p-4 rounded-2xl border-2 border-cyan-200 bg-cyan-50 hover:bg-cyan-100 text-left"><div class="text-2xl">👥</div><div class="font-black mt-1 text-cyan-900">담임교사</div><div class="text-[10px] text-cyan-700 mt-1">학급·학생 종합관리 중심</div></button>
+      <button type="button" onclick="window.firebaseUI?.chooseRole?.('student')" class="p-4 rounded-2xl border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 text-left"><div class="text-2xl">🧑‍🎓</div><div class="font-black mt-1 text-blue-900">학생</div><div class="text-[10px] text-blue-700 mt-1">탐구·면접 연습 중심</div></button>
+      <button type="button" onclick="window.firebaseUI?.chooseRole?.('admin')" class="p-4 rounded-2xl border-2 border-slate-200 bg-slate-50 hover:bg-slate-100 text-left"><div class="text-2xl">🛠️</div><div class="font-black mt-1 text-slate-900">개발·관리</div><div class="text-[10px] text-slate-600 mt-1">기능 점검용 · 타 사용자 열람 권한 없음</div></button>
     </div>
   </div>
 </div>
@@ -2886,7 +2884,9 @@ window.speakCurrentInterviewQ = function () {
 <script src="./rules-engine.js"></script>
 <script src="./official-2026.js"></script>
 <script src="./project-writer.js"></script>
-<script src="./evidence-fusion.js?v=2.9.0"></script>
+<script src="./evidence-fusion.js?v=3.0.0"></script>
+<script src="./student-workspace.js?v=3.0.0"></script>
+<script src="./analytics-dashboard.js?v=3.0.0"></script>
 
 <script type="module" src="./firebase-cloud.js"></script>
 
