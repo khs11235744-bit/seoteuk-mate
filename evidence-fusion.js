@@ -4,7 +4,7 @@
 if(window.__SEOTEUK_V28_LOADED__) return;
 window.__SEOTEUK_V28_LOADED__=true;
 
-const VERSION='3.2.0';
+const VERSION='3.3.0';
 const HISTORY_KEY='seoteukMate.v28.history';
 const REDO_KEY='seoteukMate.v28.redo';
 const ALT_KEY='seoteukMate.v28.alternatives';
@@ -801,7 +801,7 @@ setTimeout(()=>{patchActions();patchVersionTexts();bindCategoryEvents();syncCate
 if(window.__SEOTEUK_V29_LOADED__) return;
 window.__SEOTEUK_V29_LOADED__=true;
 
-const VERSION='3.2.0';
+const VERSION='3.3.0';
 const AG_KEY='seoteukMate.antigravityDev.v1';
 const KNOWN_MODELS=[
  ['gemini-3.8-flash-high','Gemini 3.8 Flash (High)'],

@@ -1,2 +1,2 @@
-Seoteuk Mate v3.2.0
-Offline local tools · Admissions center · Firebase Google sign-in · Student Workspace · Analytics
+Seoteuk Mate v3.3.0
+Teacher UX · visible login/logout · spelling/spacing review · student home · class close dashboard · admissions 2.0
