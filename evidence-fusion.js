@@ -793,3 +793,367 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 else setTimeout(init,180);
 setTimeout(()=>{patchActions();patchVersionTexts();bindCategoryEvents();syncCategoryContext();},1300);
 })();
+
+
+/* ================= v2.9 AG MODEL SELECTOR + GLOBAL PROGRESS ================= */
+(function(){
+'use strict';
+if(window.__SEOTEUK_V29_LOADED__) return;
+window.__SEOTEUK_V29_LOADED__=true;
+
+const VERSION='2.9.0';
+const AG_KEY='seoteukMate.antigravityDev.v1';
+const KNOWN_MODELS=[
+ ['gemini-3.8-flash-high','Gemini 3.8 Flash (High)'],
+ ['gemini-3.8-flash-medium','Gemini 3.8 Flash (Medium)'],
+ ['gemini-3.7-flash-high','Gemini 3.7 Flash (High)'],
+ ['gemini-3.7-flash-medium','Gemini 3.7 Flash (Medium)'],
+ ['gemini-3.6-flash-high','Gemini 3.6 Flash (High)'],
+ ['gemini-3.6-flash-medium','Gemini 3.6 Flash (Medium)'],
+ ['gemini-3.1-pro-high','Gemini 3.1 Pro (High)'],
+ ['claude-sonnet-4-6','Claude Sonnet 4.6 (Thinking)'],
+ ['claude-opus-4-6','Claude Opus 4.6 (Thinking)']
+];
+const $=id=>document.getElementById(id);
+const toast=(m,t='info')=>window.showToast?.(m,t);
+
+let autoRequests=0;
+let autoOwnsProgress=false;
+let autoTimer=null;
+let autoValue=0;
+let bulkState=null;
+
+function ensureProgress(){
+  let p=$('sm28-progress');
+  if(p) return p;
+  p=document.createElement('div');
+  p.id='sm28-progress';
+  p.className='hidden fixed left-1/2 -translate-x-1/2 top-14 z-[210] w-[min(92vw,660px)] no-print';
+  p.innerHTML=`<div class="bg-white/95 backdrop-blur border border-blue-200 rounded-2xl shadow-xl p-3">
+    <div class="flex items-center justify-between gap-3 mb-2">
+      <div class="min-w-0"><div id="sm28-progress-label" class="text-xs font-black text-slate-900 truncate">작업 준비</div><div id="sm28-progress-detail" class="text-[10px] text-slate-500 truncate">진행 중입니다.</div></div>
+      <div id="sm28-progress-pct" class="text-sm font-black text-blue-700">0%</div>
+    </div>
+    <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden"><div id="sm28-progress-bar" class="h-full bg-blue-600 rounded-full transition-all duration-500" style="width:0%"></div></div>
+  </div>`;
+  document.body.appendChild(p);
+  return p;
+}
+function gpSet(v,label,detail){
+  const p=ensureProgress();
+  p.classList.remove('hidden');
+  autoValue=Math.max(0,Math.min(100,Math.round(v)));
+  $('sm28-progress-bar').style.width=autoValue+'%';
+  $('sm28-progress-pct').textContent=autoValue+'%';
+  if(label) $('sm28-progress-label').textContent=label;
+  if(detail) $('sm28-progress-detail').textContent=detail;
+}
+function inferLabel(prompt){
+  const p=String(prompt||'');
+  if(/면접.*질문|꼬리질문|질문 5개|대학 면접/.test(p)) return ['🎙️ 면접 질문 생성 중','세특을 읽고 질문과 답변 포인트를 만들고 있습니다.'];
+  if(/수험생 답변|답변을.*평가|SCORE:/.test(p)) return ['🧑‍⚖️ 면접 답변 분석 중','답변의 구체성·근거·역할·성찰을 분석하고 있습니다.'];
+  if(/탐구 아이디어|지식 조각|지식팩|참고지식/.test(p)) return ['📚 지식팩 분석·생성 중','관련 지식과 규칙을 연결하고 있습니다.'];
+  if(/학교생활기록부|세특|특기사항|교과 세부능력/.test(p)) return ['✍️ 생활기록부 문장 생성 중','근거·문맥·기재 규칙을 반영하고 있습니다.'];
+  if(/연결 확인용|연결 정상/.test(p)) return ['🔌 AI 연결 테스트 중','실제 짧은 생성으로 엔진 연결을 확인하고 있습니다.'];
+  return ['🤖 AI 작업 진행 중','응답을 생성하고 있습니다. 창을 닫지 마세요.'];
+}
+function gpStart(label,detail){
+  clearInterval(autoTimer);
+  gpSet(6,label,detail);
+  autoTimer=setInterval(()=>{
+    if(autoValue<88){
+      const inc=autoValue<35?2:autoValue<65?1:0.5;
+      gpSet(Math.min(88,autoValue+inc),label,detail);
+    }
+  },900);
+}
+function gpDone(label='완료'){
+  clearInterval(autoTimer);
+  gpSet(100,label,'작업이 완료되었습니다.');
+  setTimeout(()=>ensureProgress().classList.add('hidden'),850);
+}
+function gpFail(label='작업 실패'){
+  clearInterval(autoTimer);
+  gpSet(100,'⚠️ '+label,'오류 내용을 확인해 주세요.');
+  const bar=$('sm28-progress-bar');
+  if(bar) bar.className='h-full bg-rose-500 rounded-full transition-all duration-500';
+  setTimeout(()=>{
+    ensureProgress().classList.add('hidden');
+    if(bar) bar.className='h-full bg-blue-600 rounded-full transition-all duration-500';
+  },1600);
+}
+function panelBusy(){
+  const p=ensureProgress();
+  return !p.classList.contains('hidden') && $('sm28-progress-pct')?.textContent!=='100%';
+}
+function autoBegin(prompt){
+  autoRequests++;
+  if(autoRequests===1){
+    autoOwnsProgress=!panelBusy();
+    if(autoOwnsProgress){
+      const [label,detail]=inferLabel(prompt);
+      gpStart(label,detail);
+    }
+  }
+  if(autoOwnsProgress && bulkState){
+    const done=bulkState.done||0,total=Math.max(1,bulkState.total||1);
+    gpSet(8+Math.round((done/total)*82),`👥 일괄 생성 중 · ${done}/${total}`,`현재 학생 기록을 생성하고 있습니다.`);
+  }
+  return autoOwnsProgress;
+}
+function autoEnd(ok,prompt){
+  if(bulkState && ok){
+    bulkState.done++;
+    const total=Math.max(1,bulkState.total);
+    gpSet(8+Math.round((bulkState.done/total)*86),`👥 일괄 생성 중 · ${bulkState.done}/${total}`,`${bulkState.done}명 완료`);
+  }
+  autoRequests=Math.max(0,autoRequests-1);
+  if(autoRequests===0 && autoOwnsProgress && !bulkState){
+    if(ok) gpDone('AI 작업 완료'); else gpFail('AI 작업 실패');
+    autoOwnsProgress=false;
+  }
+}
+window.SeoteukProgress={
+  start:(label,detail)=>gpStart(label,detail),
+  set:(v,label,detail)=>gpSet(v,label,detail),
+  done:label=>gpDone(label),
+  fail:label=>gpFail(label),
+  visible:()=>panelBusy()
+};
+
+function wrapAIRequest(){
+  if(!window.SeoteukAI?.request || window.SeoteukAI.request.__sm29) return;
+  const old=window.SeoteukAI.request.bind(window.SeoteukAI);
+  const wrapped=async function(prompt,image){
+    autoBegin(prompt);
+    try{
+      const r=await old(prompt,image);
+      autoEnd(true,prompt);
+      return r;
+    }catch(e){
+      autoEnd(false,prompt);
+      throw e;
+    }
+  };
+  wrapped.__sm29=true;
+  window.SeoteukAI.request=wrapped;
+}
+function wrapAsync(name,label,detail){
+  const old=window[name];
+  if(typeof old!=='function' || old.__sm29progress) return;
+  const wrapped=async function(...args){
+    const own=!panelBusy();
+    if(own) gpStart(label,detail||'작업이 진행 중입니다.');
+    try{
+      const r=await old.apply(this,args);
+      if(own) gpDone(label.replace(/ 중$| 중…$/,'')+' 완료');
+      return r;
+    }catch(e){
+      if(own) gpFail(label.replace(/ 중$| 중…$/,'')+' 실패');
+      throw e;
+    }
+  };
+  wrapped.__sm29progress=true;
+  window[name]=wrapped;
+}
+function installProgressCoverage(){
+  wrapAIRequest();
+  wrapAsync('extractInterviewQuestionsFromOcr','🎙️ 면접 질문 생성 중','세특을 분석해 질문 5개를 만드는 중입니다.');
+  wrapAsync('evaluateInterviewAnswer','🧑‍⚖️ 면접 답변 분석 중','답변을 평가하고 피드백을 만드는 중입니다.');
+  wrapAsync('generateKnowledgeFromVault','📚 지식팩 검색·생성 중','내장 지식팩과 첨부 자료를 검색하고 있습니다.');
+  wrapAsync('handlePdfUpload','📄 PDF 분석 중','페이지에서 텍스트를 추출하고 있습니다.');
+  wrapAsync('testCurrentApiKeyConnection','🔌 AI 연결 테스트 중','실제 생성 요청으로 연결 상태를 확인합니다.');
+  wrapAsync('testAntigravityGeneration','⚡ Antigravity 생성 테스트 중','선택 모델로 실제 문장을 생성하고 있습니다.');
+
+  const bulk=window.startBulkBatchProcess;
+  if(typeof bulk==='function' && !bulk.__sm29progress){
+    const wrapped=async function(...args){
+      const total=(window.bulkStudents||[]).filter(s=>s?.observation).length;
+      bulkState={total:Math.max(1,total),done:0};
+      const own=!panelBusy();
+      if(own) gpStart('👥 일괄 생성 준비',`${total}명 기록 생성 준비 중`);
+      try{
+        const r=await bulk.apply(this,args);
+        bulkState=null;
+        if(own) gpDone('일괄 생성 완료');
+        return r;
+      }catch(e){
+        bulkState=null;
+        if(own) gpFail('일괄 생성 실패');
+        throw e;
+      }
+    };
+    wrapped.__sm29progress=true;
+    window.startBulkBatchProcess=wrapped;
+  }
+}
+
+/* ---------- Antigravity model selector ---------- */
+function readAG(){
+  try{return JSON.parse(localStorage.getItem(AG_KEY)||'{}')||{}}catch(_){return{}}
+}
+function writeAG(partial){
+  const cur=readAG();
+  const next=Object.assign({},cur,partial);
+  localStorage.setItem(AG_KEY,JSON.stringify(next));
+  return next;
+}
+function ensureModelOption(select,slug,label){
+  if(!slug) return;
+  let opt=[...select.options].find(o=>o.value===slug);
+  if(!opt){
+    opt=document.createElement('option');
+    opt.value=slug;
+    select.appendChild(opt);
+  }
+  opt.textContent=label||slug;
+}
+function modelLabel(slug){
+  if(!slug) return 'AG 기본 모델';
+  const sel=$('ag-bridge-model');
+  return [...(sel?.options||[])].find(o=>o.value===slug)?.textContent||slug;
+}
+function ensureModelChip(){
+  let chip=$('sm29-ag-model-chip');
+  if(chip) return chip;
+  const header=$('btn-header-ai-indicator');
+  if(!header) return null;
+  chip=document.createElement('span');
+  chip.id='sm29-ag-model-chip';
+  chip.className='hidden md:inline-flex text-[9px] px-2 py-1 rounded-lg bg-violet-50 text-violet-800 border border-violet-200 font-black max-w-[210px] truncate';
+  header.insertAdjacentElement('afterend',chip);
+  return chip;
+}
+function updateModelChip(){
+  const st=readAG(),chip=ensureModelChip();
+  if(!chip) return;
+  const label=modelLabel(st.model||'');
+  chip.textContent=`⚙️ ${label}`;
+  chip.title=`Antigravity 모델: ${label}`;
+  chip.classList.toggle('hidden',window.currentProvider!=='antigravity');
+  const inline=$('ag-dev-inline-status');
+  if(inline && /연결|Antigravity|agy/.test(inline.textContent||'')){
+    inline.textContent=`${inline.textContent.split(' · 모델:')[0]} · 모델: ${label}`;
+  }
+}
+function ensureAGModelUI(){
+  const sel=$('ag-bridge-model');
+  if(!sel) return;
+  const saved=readAG().model||'';
+  for(const [slug,label] of KNOWN_MODELS) ensureModelOption(sel,slug,label);
+  if(saved) ensureModelOption(sel,saved,saved);
+  sel.value=saved;
+  if(!sel.dataset.sm29){
+    sel.dataset.sm29='1';
+    sel.addEventListener('change',()=>{
+      writeAG({model:sel.value});
+      window.saveAntigravityDevSettings?.();
+      updateModelChip();
+      toast(`⚡ Antigravity 모델: ${modelLabel(sel.value)}`,'success');
+    });
+  }
+  const btn=$('btn-ag-model-refresh');
+  if(btn) btn.onclick=window.refreshAntigravityModels;
+  updateModelChip();
+}
+window.refreshAntigravityModels=async function(){
+  ensureAGModelUI();
+  const st=readAG();
+  const url=(st.url||$('ag-bridge-url')?.value||'http://127.0.0.1:8765').replace(/\/$/,'');
+  const token=st.token||$('ag-bridge-token')?.value||'';
+  const status=$('ag-model-list-status');
+  const btn=$('btn-ag-model-refresh');
+  if(status) status.textContent='PC의 agy models 목록을 읽는 중…';
+  if(btn){btn.disabled=true;btn.textContent='…';}
+  const own=!panelBusy();
+  if(own) gpStart('⚡ Antigravity 모델 목록 확인','PC의 agy models 결과를 읽고 있습니다.');
+  try{
+    if(!token) throw new Error('브리지 토큰이 없습니다.');
+    const r=await fetch(`${url}/v1/models`,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=UTF-8'},
+      body:JSON.stringify({token})
+    });
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.ok) throw new Error(d.error||`HTTP ${r.status}`);
+    const sel=$('ag-bridge-model');
+    const saved=readAG().model||'';
+    const fallbackLabel=sel.options[0]?.textContent||'AG 기본값 (CLI에서 선택한 기본 모델)';
+    sel.innerHTML='';
+    const def=document.createElement('option');def.value='';def.textContent=fallbackLabel;sel.appendChild(def);
+    for(const m of (d.models||[])) ensureModelOption(sel,m.slug,m.label?`${m.label} · ${m.slug}`:m.slug);
+    for(const [slug,label] of KNOWN_MODELS) ensureModelOption(sel,slug,label);
+    if(saved) ensureModelOption(sel,saved,saved);
+    sel.value=saved;
+    if(status) status.textContent=`실제 agy models ${d.models?.length||0}개 확인 · 선택값은 세특메이트 생성에 즉시 적용`;
+    updateModelChip();
+    if(own) gpDone('모델 목록 갱신 완료');
+  }catch(e){
+    if(status) status.textContent=`동적 목록 확인 실패 · 기본 목록은 계속 사용 가능 (${e.message})`;
+    if(own) gpFail('모델 목록 확인 실패');
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='↻';}
+  }
+};
+function wrapAGFunctions(){
+  const saveFn=window.saveAntigravityDevSettings;
+  if(typeof saveFn==='function'&&!saveFn.__sm29model){
+    const wrapped=function(...args){
+      const r=saveFn.apply(this,args);
+      ensureAGModelUI();updateModelChip();
+      return r;
+    };
+    wrapped.__sm29model=true;
+    window.saveAntigravityDevSettings=wrapped;
+  }
+  const testFn=window.testAntigravityBridge;
+  if(typeof testFn==='function'&&!testFn.__sm29model){
+    const wrapped=async function(...args){
+      const own=!panelBusy();
+      if(own) gpStart('⚡ Antigravity 연결 확인','브리지·토큰·agy 상태를 확인하고 있습니다.');
+      try{
+        const ok=await testFn.apply(this,args);
+        if(ok){
+          ensureAGModelUI();
+          await window.refreshAntigravityModels().catch(()=>{});
+          updateModelChip();
+          if(own) gpDone('Antigravity 연결 완료');
+        }else if(own) gpFail('Antigravity 연결 실패');
+        return ok;
+      }catch(e){
+        if(own) gpFail('Antigravity 연결 실패');
+        throw e;
+      }
+    };
+    wrapped.__sm29model=true;
+    window.testAntigravityBridge=wrapped;
+  }
+  const launch=window.launchAndConnectAntiGravity;
+  if(typeof launch==='function'&&!launch.__sm29model){
+    const wrapped=function(...args){
+      const r=launch.apply(this,args);
+      setTimeout(()=>{ensureAGModelUI();},30);
+      return r;
+    };
+    wrapped.__sm29model=true;
+    window.launchAndConnectAntiGravity=wrapped;
+  }
+}
+function patchVersion(){
+  const badge=[...document.querySelectorAll('header span')].find(x=>/P\.O\.H\.A\.N\.G 2026/.test(x.textContent||''));
+  if(badge) badge.textContent=`P.O.H.A.N.G 2026 · v${VERSION} AG MODEL + GLOBAL PROGRESS`;
+  document.title=`Seoteuk Mate P.O.H.A.N.G v${VERSION} - AG Model Selector · Global Progress · Evidence Fusion`;
+}
+function init(){
+  patchVersion();
+  ensureProgress();
+  ensureAGModelUI();
+  installProgressCoverage();
+  wrapAGFunctions();
+  updateModelChip();
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(init,220));
+else setTimeout(init,220);
+setTimeout(()=>{init();},1500);
+})();
+

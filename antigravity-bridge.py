@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Seoteuk Mate Antigravity DEV Bridge v2.6.0
+# Seoteuk Mate Antigravity DEV Bridge v2.9.0
 # Browser -> localhost -> official Google Antigravity CLI (agy)
 
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -106,6 +106,35 @@ def agy_version():
         return f'installed ({type(e).__name__})'
 
 
+def agy_models():
+    """Return currently available Antigravity model slugs from `agy models`."""
+    exe = find_agy()
+    if not exe:
+        raise RuntimeError('Antigravity CLI(agy)를 찾지 못했습니다.')
+    r = run_cmd([exe, 'models'], 20)
+    raw = ((r.stdout or '') + ('\n' + r.stderr if r.stderr else '')).strip()
+    if r.returncode != 0:
+        raise RuntimeError(raw or f'agy models exited with code {r.returncode}')
+    models = []
+    seen = set()
+    for line in raw.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        m = __import__('re').match(r'^([a-z0-9][a-z0-9._:-]*(?:-[a-z0-9._:-]+)+)\s+(.+?)\s*$', line, __import__('re').I)
+        if not m:
+            continue
+        slug, label = m.group(1).strip(), m.group(2).strip()
+        if slug.lower() in seen:
+            continue
+        # Filter obvious non-model diagnostics.
+        if slug.lower().startswith(('http-', 'warning-', 'error-')):
+            continue
+        seen.add(slug.lower())
+        models.append({'slug': slug, 'label': label})
+    return models, raw
+
+
 def run_agy(prompt, model='', effort='medium', timeout_seconds=330):
     exe = find_agy()
     if not exe:
@@ -185,7 +214,7 @@ class ReusableServer(ThreadingHTTPServer):
 
 
 class Handler(BaseHTTPRequestHandler):
-    server_version = 'SeoteukMateAGBridge/2.6.0'
+    server_version = 'SeoteukMateAGBridge/2.9.0'
 
     def log_message(self, fmt, *args):
         print('[bridge]', fmt % args)
@@ -237,7 +266,7 @@ class Handler(BaseHTTPRequestHandler):
             self._json(200, {
                 'ok': True,
                 'bridge': 'seoteukmate-antigravity-dev',
-                'bridge_version': '2.6.0',
+                'bridge_version': '2.9.0',
                 'engine': 'antigravity-cli',
                 'agy_found': bool(exe),
                 'agy_path': exe,
@@ -272,6 +301,23 @@ class Handler(BaseHTTPRequestHandler):
             })
             return
 
+        if path == '/v1/models':
+            if not self._authorized(body):
+                self._json(401, {'ok': False, 'error': '브리지 토큰이 일치하지 않습니다.'})
+                return
+            try:
+                models, raw = agy_models()
+                self._json(200, {
+                    'ok': True,
+                    'engine': 'antigravity-cli',
+                    'models': models,
+                    'count': len(models),
+                    'raw_preview': raw[:2000],
+                })
+            except Exception as e:
+                self._json(500, {'ok': False, 'error': str(e)})
+            return
+
         if path != '/v1/generate':
             self._json(404, {'ok': False, 'error': 'Not found'})
             return
@@ -296,7 +342,7 @@ def main():
     exe = find_agy()
     copied = copy_token_to_clipboard()
     print('\n============================================================')
-    print(' Seoteuk Mate — Antigravity DEV Bridge v2.6.0')
+    print(' Seoteuk Mate — Antigravity DEV Bridge v2.9.0')
     print('============================================================')
     print(f' 주소 : http://127.0.0.1:{PORT}')
     print(f' 대체 : http://localhost:{PORT}')

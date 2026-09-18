@@ -1,2 +1,2 @@
-Seoteuk Mate v2.8.0
-Progress UI · clean single-output parser · alternatives outside byte count · category topic selectors
+Seoteuk Mate v2.9.0
+Antigravity model selector · actual agy models refresh · global progress coverage
