@@ -1,9 +1,9 @@
-/* Seoteuk Mate v3.3 — Teacher UX */
+/* Seoteuk Mate v3.5 — Teacher UX stabilization */
 (function(){
 'use strict';
-if(window.__SEOTEUK_TEACHER_UX_V33__) return;
-window.__SEOTEUK_TEACHER_UX_V33__=true;
-const VERSION='3.3.0';
+if(window.__SEOTEUK_TEACHER_UX_V35__) return;
+window.__SEOTEUK_TEACHER_UX_V35__=true;
+const VERSION='3.5.0';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??d}catch(_){return d}};
@@ -58,6 +58,7 @@ function ensureHeaderStatus(){
  const wrap=document.createElement('div');wrap.id='sm33-account-wrap';wrap.className='relative';wrap.innerHTML=`<button id="sm33-account-chip" type="button" class="sm33-chip"><span id="sm33-account-avatar">👤</span><span id="sm33-account-text">Google 로그인</span><span>▾</span></button>
  <div id="sm33-account-menu" class="sm33-menu hidden"><div id="sm33-account-info" class="p-2 mb-1 border-b text-[11px] text-slate-600"></div>
  <button class="sm33-action" onclick="window.firebaseUI?.saveNow?.()">☁️ 지금 클라우드 저장</button>
+ <button id="sm35-conflict-btn" class="sm33-action" onclick="openCloudConflicts35()">🛟 충돌 백업 <span id="sm35-conflict-count"></span></button>
  <button class="sm33-action" onclick="window.openCloudAccountModal?.()">⚙️ 계정·클라우드 설정</button>
  <button class="sm33-action text-rose-700" onclick="window.firebaseUI?.signOut?.()">🚪 로그아웃</button></div>`;
  p.appendChild(wrap);
@@ -72,8 +73,50 @@ function syncHeaderStatus(){
  if(avatar)avatar.innerHTML=user?.photoURL?`<img src="${esc(user.photoURL)}" class="w-6 h-6 rounded-full">`:'👤';
  const provider=window.currentProvider||'미선택',dot=$('sm33-ai-dot'),text=$('sm33-ai-text');
  let connected=true,label=provider==='antigravity'?'Antigravity':provider==='gemini'?'Gemini':provider==='server'?'서버 AI':provider;
- if(provider==='antigravity'){const s=$('ag-dev-inline-status')?.textContent||'';connected=/연결|패킷 사용 중|확인 완료/.test(s);if(!connected)label='Antigravity 연결 확인'}
+ if(!navigator.onLine){connected=false;label='오프라인 · 로컬 기능 사용 가능'}
+ else if(provider==='antigravity'){const s=$('ag-dev-inline-status')?.textContent||'';connected=/연결|패킷 사용 중|확인 완료/.test(s);if(!connected)label='Antigravity 연결 확인'}
  if(text)text.textContent='AI · '+label;if(dot)dot.style.background=connected?'#10b981':'#f59e0b';
+ const conflicts=load('seoteukMate.cloudConflicts.v35',[]);
+ const cc=$('sm35-conflict-count');if(cc)cc.textContent=conflicts.length?('('+conflicts.length+')'):'';
+ const cb=$('sm35-conflict-btn');if(cb)cb.classList.toggle('hidden',!conflicts.length);
+}
+
+function conflictPreview(rec){
+ const d=rec?.appState?.subjectData||{};
+ for(const sems of Object.values(d))for(const vers of Object.values(sems||{}))for(const t of Object.values(vers||{}))if(String(t||'').trim())return String(t).trim().slice(0,180);
+ const cd=rec?.categoryDrafts||{};
+ for(const sems of Object.values(cd))for(const vers of Object.values(sems||{}))for(const t of Object.values(vers||{}))if(String(t||'').trim())return String(t).trim().slice(0,180);
+ return '본문 미리보기 없음';
+}
+window.openCloudConflicts35=function(){
+ const arr=load('seoteukMate.cloudConflicts.v35',[]);
+ if(!arr.length)return toast('보관된 충돌 백업이 없습니다.','info');
+ const ws=window.SeoteukWorkspace?.getWorkspace?.()||load(WORKSPACE_KEY,{students:[]});
+ const html=arr.map((x,i)=>{
+   const s=(ws.students||[]).find(v=>v.id===x.studentId);
+   return `<div class="p-4 border rounded-2xl mb-3"><div class="flex justify-between gap-2"><div><b>${esc(s?((s.no||'')+' '+s.name):x.studentId)}</b><div class="text-[10px] text-slate-500 mt-1">${new Date(x.createdAt||Date.now()).toLocaleString()}</div></div><button onclick="deleteCloudConflict35(${i})" class="text-xs text-rose-700">백업 삭제</button></div><div class="grid md:grid-cols-2 gap-2 mt-3"><div class="p-3 bg-blue-50 rounded-xl"><b class="text-xs">클라우드 쪽</b><p class="text-[11px] leading-5 mt-1">${esc(conflictPreview(x.remoteSnapshot))}</p><button onclick="restoreCloudConflict35(${i},'remote')" class="mt-2 px-2 py-1 bg-blue-600 text-white rounded-lg text-xs font-black">이 버전 복원</button></div><div class="p-3 bg-amber-50 rounded-xl"><b class="text-xs">이 기기 쪽</b><p class="text-[11px] leading-5 mt-1">${esc(conflictPreview(x.localSnapshot))}</p><button onclick="restoreCloudConflict35(${i},'local')" class="mt-2 px-2 py-1 bg-amber-500 text-white rounded-lg text-xs font-black">이 버전 복원</button></div></div></div>`;
+ }).join('');
+ showModal('🛟 클라우드 충돌 백업','다른 기기에서 더 최근에 수정된 기록과 충돌했을 때 양쪽 버전을 보관합니다.',html);
+};
+window.deleteCloudConflict35=function(index){
+ const key='seoteukMate.cloudConflicts.v35',arr=load(key,[]);arr.splice(index,1);localStorage.setItem(key,JSON.stringify(arr));syncHeaderStatus();window.openCloudConflicts35?.();
+};
+window.restoreCloudConflict35=async function(index,which){
+ const key='seoteukMate.cloudConflicts.v35',arr=load(key,[]),entry=arr[index];if(!entry)return;
+ const src=which==='remote'?entry.remoteSnapshot:entry.localSnapshot;
+ const rec=JSON.parse(JSON.stringify(src||{}));rec.savedAt=Date.now();rec.cloudBaseUpdatedAt=Number(entry.remoteSnapshot?.updatedAt?.seconds||0)*1000;
+ const all=load(RECORD_KEY,{});all[entry.studentId]=rec;localStorage.setItem(RECORD_KEY,JSON.stringify(all));
+ const current=currentStudent();
+ if(current?.id===entry.studentId){
+   if(rec.appState)localStorage.setItem('seoteukMate.webapp.v1',JSON.stringify(rec.appState));
+   localStorage.setItem('seoteukMate.v28.categoryDrafts',JSON.stringify(rec.categoryDrafts||{}));
+   localStorage.setItem('seoteukMate.v28.categoryTopics',JSON.stringify(rec.categoryTopics||{}));
+   localStorage.setItem('seoteukMate.projects.v25',JSON.stringify(rec.projectCards||[]));
+ }
+ await window.SeoteukCloud?.saveStudentRecord?.(entry.studentId,rec).catch(()=>{});
+ arr.splice(index,1);localStorage.setItem(key,JSON.stringify(arr));
+ toast(which==='remote'?'클라우드 버전을 복원했습니다.':'이 기기 버전을 복원했습니다.','success');
+ if(current?.id===entry.studentId)setTimeout(()=>location.reload(),400);else{syncHeaderStatus();window.closeSM33Modal?.();}
 }
 
 const SPELL_RULES=[
@@ -176,10 +219,10 @@ function patchAnalytics(){
  const wrapped=function(){old();setTimeout(()=>{const body=$('sm3-analytics-body');if(body&&!$('sm33-audit-tip')){const d=document.createElement('div');d.id='sm33-audit-tip';d.className='mb-3 p-3 rounded-2xl bg-blue-50 border border-blue-200 text-xs text-blue-900';d.innerHTML='<b>분석표 2.0:</b> 위 지표는 합격 가능성이나 학생 순위가 아니라 기록의 근거·과정·반복을 점검하는 교사용 참고 정보입니다. 현재 문장은 <button onclick="closeAnalyticsDashboard();openSpellCheck33()" class="underline font-black">맞춤법·띄어쓰기</button>에서 교정할 수 있습니다.';body.prepend(d)}},30)};wrapped.__sm33=true;window.openAnalyticsDashboard=wrapped;
 }
 function version(){
- const badge=[...document.querySelectorAll('header span')].find(x=>/P\.O\.H\.A\.N\.G 2026/.test(x.textContent||''));if(badge)badge.textContent='P.O.H.A.N.G 2026 · v3.4.0 LIVE CHECK';
- document.title='Seoteuk Mate P.O.H.A.N.G v3.4.0 - Live Check · Teacher UX · Cloud';
+ const badge=[...document.querySelectorAll('header span')].find(x=>/P\.O\.H\.A\.N\.G 2026/.test(x.textContent||''));if(badge)badge.textContent='P.O.H.A.N.G 2026 · v3.5.0 STABLE';
+ document.title='Seoteuk Mate P.O.H.A.N.G v3.5.0 - Stable · Live Check · Cloud';
 }
-function init(){injectStyle();modalRoot();ensureHeaderStatus();enhanceMenu();patchAnalytics();version();setTimeout(()=>{enhanceMenu();syncHeaderStatus()},1400)}
+function init(){injectStyle();modalRoot();ensureHeaderStatus();enhanceMenu();patchAnalytics();version();window.addEventListener('online',syncHeaderStatus);window.addEventListener('offline',syncHeaderStatus);setTimeout(()=>{enhanceMenu();syncHeaderStatus()},1400)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,300));else setTimeout(init,300);
 })();
 /* admissions 2.0 enhancement */

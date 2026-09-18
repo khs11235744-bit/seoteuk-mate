@@ -14,6 +14,7 @@ window.SeoteukCloud=window.SeoteukCloud||{};
 function progressStart(label,detail){window.SeoteukProgress?.start?.(label,detail)}
 function progressDone(label){window.SeoteukProgress?.done?.(label)}
 function progressFail(label){window.SeoteukProgress?.fail?.(label)}
+function timestampMs(v){try{return typeof v?.toMillis==='function'?v.toMillis():Number(v?.seconds||0)*1000}catch(_){return 0}}
 
 function status(label,on=false){
   const l=byId('cloud-status-label'); if(l)l.textContent=label;
@@ -144,7 +145,7 @@ if(!configured){
 }else{
   try{
     progressStart('☁️ 클라우드 초기화','Firebase 인증·저장소를 준비하고 있습니다.');
-    const [{initializeApp},{getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut},{getFirestore,doc,getDoc,setDoc,deleteDoc,serverTimestamp}] = await Promise.all([
+    const [{initializeApp},{getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,onAuthStateChanged,signOut},{getFirestore,doc,getDoc,setDoc,deleteDoc,serverTimestamp,collection,getDocs}] = await Promise.all([
       import('https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js'),
       import('https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js'),
       import('https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js')
@@ -201,13 +202,44 @@ if(!configured){
       },
       async saveStudentRecord(studentId,record){
         if(!user||!studentId)return false;
-        await setDoc(doc(db,'users',user.uid,'students',studentId),{...record,updatedAt:serverTimestamp()},{merge:false});
-        return true;
+        const ref=doc(db,'users',user.uid,'students',studentId);
+        const current=await getDoc(ref);
+        const remote=current.exists()?current.data():null;
+        const remoteUpdated=timestampMs(remote?.updatedAt);
+        const baseUpdated=Number(record?.cloudBaseUpdatedAt||0);
+        const hasConflict=!!(remote&&baseUpdated&&remoteUpdated>baseUpdated+1000);
+        if(hasConflict){
+          const conflictId=studentId+'_'+Date.now();
+          try{
+            await setDoc(doc(db,'users',user.uid,'conflicts',conflictId),{
+              studentId,reason:'remote-newer',remoteSnapshot:remote,localSnapshot:record,createdAt:serverTimestamp()
+            },{merge:false});
+          }catch(_){}
+          try{
+            const key='seoteukMate.cloudConflicts.v35';
+            const arr=JSON.parse(localStorage.getItem(key)||'[]');
+            arr.unshift({studentId,reason:'remote-newer',remoteSnapshot:remote,localSnapshot:record,createdAt:Date.now()});
+            localStorage.setItem(key,JSON.stringify(arr.slice(0,30)));
+          }catch(_){}
+          window.showToast?.('클라우드에 더 최신 기록이 있어 충돌 백업을 만든 뒤 현재 기록을 저장했습니다.','warning');
+        }
+        const payload={...record};delete payload.cloudBaseUpdatedAt;
+        await setDoc(ref,{...payload,updatedAt:serverTimestamp()},{merge:false});
+        const saved=await getDoc(ref);
+        return {ok:true,conflict:hasConflict,cloudBaseUpdatedAt:timestampMs(saved.data()?.updatedAt)};
       },
       async loadStudentRecord(studentId){
         if(!user||!studentId)return null;
         const snap=await getDoc(doc(db,'users',user.uid,'students',studentId));
-        return snap.exists()?snap.data():null;
+        if(!snap.exists())return null;
+        const data=snap.data();return {...data,cloudBaseUpdatedAt:timestampMs(data.updatedAt)};
+      },
+      async loadAllStudentRecords(){
+        if(!user)return {};
+        const snap=await getDocs(collection(db,'users',user.uid,'students'));
+        const out={};
+        snap.forEach(d=>{const data=d.data();out[d.id]={...data,cloudBaseUpdatedAt:timestampMs(data.updatedAt)}});
+        return out;
       },
       async deleteStudentRecord(studentId){
         if(!user||!studentId)return false;

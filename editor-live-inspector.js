@@ -1,9 +1,9 @@
-/* Seoteuk Mate v3.4 — live editor quality inspector */
+/* Seoteuk Mate v3.5 — live editor quality inspector */
 (function(){
 'use strict';
-if(window.__SEOTEUK_LIVE_INSPECTOR_V34__) return;
-window.__SEOTEUK_LIVE_INSPECTOR_V34__=true;
-const VERSION='3.4.0';
+if(window.__SEOTEUK_LIVE_INSPECTOR_V35__) return;
+window.__SEOTEUK_LIVE_INSPECTOR_V35__=true;
+const VERSION='3.5.0';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??d}catch(_){return d}};
@@ -35,10 +35,18 @@ const FIX_RULES=[
  {id:'means',label:'함으로써',rx:/하므로써/g,to:'함으로써'}
 ];
 
-function tokens(s){return new Set((String(s||'').match(/[가-힣A-Za-z0-9]{2,}/g)||[]).map(x=>x.toLowerCase()))}
+const SIM_STOP=new Set('학생 활동 수업 과정 탐구 보임 통해 관련 대한 내용 자료 교과 학습 참여 작성함 실시함 수행함 이해함 확인함 있음 있음에 중심 바탕 활용'.split(' '));
+const TOKEN_CACHE=new Map();
+function tokens(s){
+ const key=String(s||'');
+ if(TOKEN_CACHE.has(key))return TOKEN_CACHE.get(key);
+ const set=new Set((key.match(/[가-힣A-Za-z0-9]{2,}/g)||[]).map(x=>x.toLowerCase()).filter(x=>!SIM_STOP.has(x)&&x.length>1));
+ TOKEN_CACHE.set(key,set);if(TOKEN_CACHE.size>1800)TOKEN_CACHE.delete(TOKEN_CACHE.keys().next().value);
+ return set;
+}
 function sim(a,b){
  const A=tokens(a),B=tokens(b);if(!A.size||!B.size)return 0;let n=0;A.forEach(x=>B.has(x)&&n++);
- return n/Math.min(A.size,B.size);
+ return n/Math.sqrt(A.size*B.size);
 }
 function sentences(t){return String(t||'').split(/(?<=[.!?])\s+/).map(x=>x.trim()).filter(Boolean)}
 function spacingIssues(t){
@@ -81,18 +89,23 @@ function liveTexts(){
  }
  return out;
 }
+function isCurrentRecord(r){
+ const cat=window.activeCategory||'교과세특',sem=window.activeSemester||'s1',ver=window.activeVersion||'v1';
+ if(cat==='교과세특')return r.area==='교과세특'&&r.subject===(window.activeSubject||'')&&r.sem===sem&&r.ver===ver;
+ return r.area===cat&&r.sem===sem&&r.ver===ver;
+}
 function crossSimilarity(t){
  if(String(t||'').trim().length<50)return{same:[],classMatches:[]};
  const stu=getStudent(),allRecords=load(RECORD_KEY,{}),same=[],classMatches=[];
  for(const r of liveTexts()){
-  if(r.text===t)continue;const score=sim(t,r.text);if(score>=.38)same.push({...r,score});
+  if(isCurrentRecord(r))continue;const score=sim(t,r.text);if(score>=.34)same.push({...r,score});
  }
  if(stu){
   const ws=workspace(),others=(ws.students||[]).filter(s=>s.id!==stu.id&&(!stu.classId||s.classId===stu.classId));
   for(const other of others){
    const rec=allRecords[other.id];
    for(const r of recordTexts(rec)){
-    const score=sim(t,r.text);if(score>=.48)classMatches.push({...r,score,student:other});
+    const score=sim(t,r.text);if(score>=.44)classMatches.push({...r,score,student:other});
    }
   }
  }
@@ -141,7 +154,9 @@ function render(){
  chip('sm34-evidence',`행동근거 ${a.verbs}`,t.trim()&&a.verbs<2);
  const same=a.cross.same[0]?.score||0,cls=a.cross.classMatches[0]?.score||0;
  chip('sm34-same',`내 기록 중복 ${Math.round(same*100)}%`,same>=.55);
- chip('sm34-class',`학급 유사 ${Math.round(cls*100)}%`,cls>=.65,cls>=.78?'bad':'warn');
+ const classReady=!window.SeoteukCloud?.getUser?.()||window.__SEOTEUK_CLASS_RECORDS_READY__===true;
+ if(classReady)chip('sm34-class',`학급 유사 ${Math.round(cls*100)}%`,cls>=.62,cls>=.76?'bad':'warn');
+ else chip('sm34-class','학급 유사 동기화중',true,'warn');
 
  const details=[];
  if(a.spacing.length){
@@ -182,9 +197,13 @@ function hideRedundantAuditButtons(){
 }
 function version(){
  const badge=[...document.querySelectorAll('header span')].find(x=>/P\.O\.H\.A\.N\.G 2026/.test(x.textContent||''));
- if(badge)badge.textContent='P.O.H.A.N.G 2026 · v3.4.0 LIVE CHECK';
- document.title='Seoteuk Mate P.O.H.A.N.G v3.4.0 - Live Check · Teacher UX · Cloud';
+ if(badge)badge.textContent='P.O.H.A.N.G 2026 · v3.5.0 STABLE';
+ document.title='Seoteuk Mate P.O.H.A.N.G v3.5.0 - Stable · Live Check · Teacher UX · Cloud';
 }
-function init(){ensureUI();patchProgrammaticChanges();hideRedundantAuditButtons();version();render();setTimeout(()=>{ensureUI();hideRedundantAuditButtons();render()},1200)}
+function init(){
+ ensureUI();patchProgrammaticChanges();hideRedundantAuditButtons();version();render();
+ window.addEventListener('seoteuk:class-records-ready',()=>render());
+ setTimeout(()=>{ensureUI();hideRedundantAuditButtons();render()},1200);
+}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,420));else setTimeout(init,420);
 })();

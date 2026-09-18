@@ -1,2 +1,2 @@
-Seoteuk Mate v3.4.0
-Live editor check · integrated spacing/official rules · same-student/class similarity · Teacher UX · Cloud
+Seoteuk Mate v3.5.0
+Stabilization · full-class cloud sync · conflict recovery · similarity refinement · smoke tests

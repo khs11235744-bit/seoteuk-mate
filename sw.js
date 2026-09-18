@@ -1,5 +1,5 @@
-const CACHE='seoteukmate-v340-20260918';
-const CORE=['./','./index.html','./ai-providers.js','./rules-engine.js','./official-2026.js','./project-writer.js','./knowledge-pack.js','./evidence-fusion.js','./student-workspace.js','./analytics-dashboard.js','./local-tools-admissions.js','./teacher-ux.js','./editor-live-inspector.js','./firebase-cloud.js'];
+const CACHE='seoteukmate-v350-20260918';
+const CORE=['./','./index.html','./ai-providers.js','./rules-engine.js','./official-2026.js','./project-writer.js','./knowledge-pack.js','./evidence-fusion.js','./student-workspace.js','./analytics-dashboard.js','./local-tools-admissions.js','./teacher-ux.js','./editor-live-inspector.js','./firebase-cloud.js','./vendor/tailwind.js','./vendor/xlsx.full.min.js','./vendor/pdf.min.js','./vendor/pdf.worker.min.js'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).catch(()=>{}));});
 self.addEventListener('activate',e=>{e.waitUntil((async()=>{for(const k of await caches.keys())if(k!==CACHE)await caches.delete(k);await self.clients.claim();})());});
 self.addEventListener('fetch',e=>{

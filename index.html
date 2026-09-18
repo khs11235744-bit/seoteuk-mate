@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Seoteuk Mate P.O.H.A.N.G v3.4.0 - Live Check · Teacher UX · Offline · Admissions · Cloud</title>
+  <title>Seoteuk Mate P.O.H.A.N.G v3.5.0 - Stable · Live Check · Cloud · Admissions</title>
 
   <meta name="theme-color" content="#2563eb" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -16,15 +16,15 @@
   <!-- Pretendard Font CDN -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
   
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- SheetJS for Offline Excel Import/Export -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <!-- PDF.js CDN for Client-side PDF Text Extraction -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- Bundled Tailwind runtime: offline-ready after app install -->
+  <script src="./vendor/tailwind.js"></script>
+  <!-- Bundled SheetJS for Offline Excel Import/Export -->
+  <script src="./vendor/xlsx.full.min.js"></script>
+  <!-- Bundled PDF.js for Client-side PDF Text Extraction -->
+  <script src="./vendor/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script>
-    if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.js';
   </script>
   
   <script>
@@ -151,7 +151,7 @@
       <div>
         <div class="flex items-center gap-1.5 flex-wrap">
           <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-900">Seoteuk Mate</h1>
-          <span class="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">P.O.H.A.N.G 2026 · v3.4.0 LIVE CHECK</span>
+          <span class="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">P.O.H.A.N.G 2026 · v3.5.0 STABLE</span>
           <span id="ai-status-badge" class="text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 hidden md:inline-block">
             ⚡ 안티그래비티 패킷 모드
           </span>
@@ -2920,12 +2920,12 @@ window.speakCurrentInterviewQ = function () {
 <script src="./rules-engine.js"></script>
 <script src="./official-2026.js"></script>
 <script src="./project-writer.js"></script>
-<script src="./evidence-fusion.js?v=3.4.0"></script>
-<script src="./student-workspace.js?v=3.4.0"></script>
-<script src="./analytics-dashboard.js?v=3.4.0"></script>
-<script src="./local-tools-admissions.js?v=3.4.0"></script>
-<script src="./teacher-ux.js?v=3.4.0"></script>
-<script src="./editor-live-inspector.js?v=3.4.0"></script>
+<script src="./evidence-fusion.js?v=3.5.0"></script>
+<script src="./student-workspace.js?v=3.5.0"></script>
+<script src="./analytics-dashboard.js?v=3.5.0"></script>
+<script src="./local-tools-admissions.js?v=3.5.0"></script>
+<script src="./teacher-ux.js?v=3.5.0"></script>
+<script src="./editor-live-inspector.js?v=3.5.0"></script>
 
 <script type="module" src="./firebase-cloud.js"></script>
 

@@ -59,8 +59,14 @@ async function saveActiveRecord(){
     student.career=$('input-career')?.value||student.career||'';
     student.major=$('input-major')?.value||student.major||'';
   }
-  const rec=captureRecord(),all=records();all[id]=rec;putRecords(all);putWs(w);
-  await window.SeoteukCloud?.saveStudentRecord?.(id,rec).catch(()=>{});
+  const all=records(),previous=all[id]||null,rec=captureRecord();
+  if(previous?.cloudBaseUpdatedAt)rec.cloudBaseUpdatedAt=previous.cloudBaseUpdatedAt;
+  all[id]=rec;putRecords(all);putWs(w);
+  const cloudResult=await window.SeoteukCloud?.saveStudentRecord?.(id,rec).catch(()=>null);
+  if(cloudResult?.cloudBaseUpdatedAt){
+    rec.cloudBaseUpdatedAt=cloudResult.cloudBaseUpdatedAt;
+    const refreshed=records();refreshed[id]=rec;putRecords(refreshed);
+  }
 }
 function applyRecord(rec){
   const r=rec||blankRecord(currentStudent());
@@ -190,8 +196,23 @@ window.exportWorkspaceRoster=()=>{
   const w=ws(),rows=w.students.map(s=>{const c=w.classes.find(x=>x.id===s.classId);return{학급:c?.name||'',번호:s.no||'',이름:s.name,진로:s.career||'',학과:s.major||'',기록수:countRecord(records()[s.id])}});
   const wsx=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,wsx,'학생목록');XLSX.writeFile(wb,'SeoteukMate_학생워크스페이스.xlsx');
 };
+async function mergeAllCloudRecords(){
+  if(!window.SeoteukCloud?.getUser?.()||!window.SeoteukCloud?.loadAllStudentRecords)return 0;
+  const cloud=await window.SeoteukCloud.loadAllStudentRecords().catch(()=>({}));
+  const local=records();let merged=0;
+  for(const [id,remote] of Object.entries(cloud||{})){
+    const here=local[id];
+    if(!here||Number(remote?.savedAt||0)>=Number(here?.savedAt||0)){
+      local[id]=remote;merged++;
+    }
+  }
+  putRecords(local);
+  window.__SEOTEUK_CLASS_RECORDS_READY__=true;
+  window.dispatchEvent(new CustomEvent('seoteuk:class-records-ready',{detail:{count:Object.keys(cloud||{}).length,merged}}));
+  return Object.keys(cloud||{}).length;
+}
 window.SeoteukWorkspace={
-  getWorkspace:()=>clone(ws()),getCurrentStudent:()=>clone(currentStudent()),saveActiveRecord,
+  getWorkspace:()=>clone(ws()),getCurrentStudent:()=>clone(currentStudent()),saveActiveRecord,mergeAllCloudRecords,
   async syncFromCloud(){
     if(!window.SeoteukCloud?.getUser?.())return;
     const cloud=await window.SeoteukCloud.loadWorkspaceIndex?.();
@@ -202,8 +223,10 @@ window.SeoteukWorkspace={
         const rec=records()[local.activeStudentId]||captureRecord();
         await window.SeoteukCloud.saveStudentRecord?.(local.activeStudentId,rec);
       }
+      await mergeAllCloudRecords().catch(()=>0);
       return;
     }
+    await mergeAllCloudRecords().catch(()=>0);
     const cloudTime=(cloud.updatedAt?.seconds||0)*1000;
     if(cloudTime>(local.updatedAt||0)){
       const next={schemaVersion:3,activeStudentId:cloud.activeStudentId||local.activeStudentId||'',classes:cloud.classes||[],students:cloud.students||[],updatedAt:Date.now()};

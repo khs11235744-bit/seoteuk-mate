@@ -1,10 +1,10 @@
-/* Seoteuk Mate v2.8 — progress, clean outputs, alternatives, category topics */
+/* Seoteuk Mate v3.5 — evidence fusion core */
 (function(){
 'use strict';
-if(window.__SEOTEUK_V28_LOADED__) return;
-window.__SEOTEUK_V28_LOADED__=true;
+if(window.__SEOTEUK_EVIDENCE_CORE_LOADED__) return;
+window.__SEOTEUK_EVIDENCE_CORE_LOADED__=true;
 
-const VERSION='3.4.0';
+const VERSION='3.5.0';
 const HISTORY_KEY='seoteukMate.v28.history';
 const REDO_KEY='seoteukMate.v28.redo';
 const ALT_KEY='seoteukMate.v28.alternatives';
@@ -795,13 +795,13 @@ setTimeout(()=>{patchActions();patchVersionTexts();bindCategoryEvents();syncCate
 })();
 
 
-/* ================= v2.9 AG MODEL SELECTOR + GLOBAL PROGRESS ================= */
+/* ================= v3.5 AG MODEL SELECTOR + GLOBAL PROGRESS ================= */
 (function(){
 'use strict';
-if(window.__SEOTEUK_V29_LOADED__) return;
-window.__SEOTEUK_V29_LOADED__=true;
+if(window.__SEOTEUK_MODEL_PROGRESS_LOADED__) return;
+window.__SEOTEUK_MODEL_PROGRESS_LOADED__=true;
 
-const VERSION='3.4.0';
+const VERSION='3.5.0';
 const AG_KEY='seoteukMate.antigravityDev.v1';
 const KNOWN_MODELS=[
  ['gemini-3.8-flash-high','Gemini 3.8 Flash (High)'],
