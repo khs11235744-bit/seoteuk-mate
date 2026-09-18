@@ -1,2 +1,2 @@
-Seoteuk Mate v3.1.0
-Intuitive labeled menu · Firebase configured · Firestore secured · Student Workspace · Analytics
+Seoteuk Mate v3.2.0
+Offline local tools · Admissions center · Firebase Google sign-in · Student Workspace · Analytics

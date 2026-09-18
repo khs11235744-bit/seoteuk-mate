@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Seoteuk Mate P.O.H.A.N.G v3.1.0 - Intuitive Menu · Google Cloud · Student Workspace · Analytics</title>
+  <title>Seoteuk Mate P.O.H.A.N.G v3.2.0 - Offline Tools · Admissions · Google Cloud · Analytics</title>
 
   <meta name="theme-color" content="#2563eb" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -151,7 +151,7 @@
       <div>
         <div class="flex items-center gap-1.5 flex-wrap">
           <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-900">Seoteuk Mate</h1>
-          <span class="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">P.O.H.A.N.G 2026 · v3.1.0 INTUITIVE UI</span>
+          <span class="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">P.O.H.A.N.G 2026 · v3.2.0 OFFLINE + ADMISSIONS</span>
           <span id="ai-status-badge" class="text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 hidden md:inline-block">
             ⚡ 안티그래비티 패킷 모드
           </span>
@@ -225,6 +225,8 @@
       <button type="button" class="sm-menu-btn" onclick="openApiKeyModal()" title="Antigravity 모델과 API 연결 설정"><span class="sm-menu-icon">🤖</span><span>AI·모델</span></button>
       <button type="button" class="sm-menu-btn" onclick="openCloudAccountModal()" title="Google 로그인과 클라우드 저장"><span class="sm-menu-icon">☁️</span><span>Google 로그인</span></button>
       <button type="button" class="sm-menu-btn" onclick="openAnalyticsDashboard()" title="학생 기록 종합 분석 대시보드"><span class="sm-menu-icon">📊</span><span>종합 분석</span></button>
+      <button type="button" class="sm-menu-btn" onclick="openLocalTools()" title="AI 없이 맞춤법·문장·바이트·기재 위험 표현을 점검"><span class="sm-menu-icon">🛠️</span><span>로컬 도구</span></button>
+      <button type="button" class="sm-menu-btn" onclick="openAdmissionsCenter()" title="대학 공식 홈페이지·모집요강 검색·PDF 요강 분석"><span class="sm-menu-icon">🎓</span><span>대입정보</span></button>
       <button type="button" class="sm-menu-btn" onclick="document.getElementById('pdfUploadInput').click()" title="생기부·활동지 PDF 가져오기"><span class="sm-menu-icon">📄</span><span>PDF 가져오기</span></button>
       <button type="button" class="sm-menu-btn" onclick="openUnivTipsModal()" title="면접·기재 팁과 사용 안내"><span class="sm-menu-icon">❓</span><span>도움말</span></button>
     </div>
@@ -2918,9 +2920,10 @@ window.speakCurrentInterviewQ = function () {
 <script src="./rules-engine.js"></script>
 <script src="./official-2026.js"></script>
 <script src="./project-writer.js"></script>
-<script src="./evidence-fusion.js?v=3.1.0"></script>
-<script src="./student-workspace.js?v=3.1.0"></script>
-<script src="./analytics-dashboard.js?v=3.1.0"></script>
+<script src="./evidence-fusion.js?v=3.2.0"></script>
+<script src="./student-workspace.js?v=3.2.0"></script>
+<script src="./analytics-dashboard.js?v=3.2.0"></script>
+<script src="./local-tools-admissions.js?v=3.2.0"></script>
 
 <script type="module" src="./firebase-cloud.js"></script>
 

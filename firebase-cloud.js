@@ -189,7 +189,6 @@ if(!configured){
     window.SeoteukCloud={
       configured:true,
       getUser:()=>user,
-      getUser:()=>user,
       async saveWorkspaceIndex(index){
         if(!user)return false;
         await setDoc(doc(db,'users',user.uid,'workspace','index'),{...index,updatedAt:serverTimestamp()},{merge:false});
@@ -222,7 +221,17 @@ if(!configured){
         if(/Mobi|Android/i.test(navigator.userAgent))await signInWithRedirect(auth,provider);
         else await signInWithPopup(auth,provider);
         progressDone('Google 로그인 완료');
-      }catch(e){progressFail('Google 로그인 실패');alert('Google 로그인: '+e.message)}
+      }catch(e){
+        progressFail('Google 로그인 실패');
+        const code=String(e?.code||'');
+        let msg=e?.message||String(e);
+        if(code==='auth/configuration-not-found')msg='Firebase Authentication의 Google 로그인 제공자 설정을 찾지 못했습니다.';
+        else if(code==='auth/unauthorized-domain')msg='현재 웹 주소가 Firebase 승인 도메인에 등록되지 않았습니다.';
+        else if(code==='auth/popup-blocked')msg='브라우저가 로그인 팝업을 차단했습니다. 주소창의 팝업 허용을 켜 주세요.';
+        else if(code==='auth/popup-closed-by-user')msg='Google 로그인 창이 닫혔습니다.';
+        window.showToast?.('Google 로그인: '+msg,'warning');
+        const d=byId('cloud-detail-status');if(d)d.textContent='로그인 실패 · '+msg;
+      }
     };
     window.firebaseUI.signOut=async()=>{await signOut(auth);status('로컬 모드');};
     window.firebaseUI.saveNow=saveNow;

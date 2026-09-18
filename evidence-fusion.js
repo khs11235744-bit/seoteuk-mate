@@ -4,7 +4,7 @@
 if(window.__SEOTEUK_V28_LOADED__) return;
 window.__SEOTEUK_V28_LOADED__=true;
 
-const VERSION='3.1.0';
+const VERSION='3.2.0';
 const HISTORY_KEY='seoteukMate.v28.history';
 const REDO_KEY='seoteukMate.v28.redo';
 const ALT_KEY='seoteukMate.v28.alternatives';
@@ -725,8 +725,8 @@ function patchVersionTexts(){
     if(span) span.textContent=label;
   }
   const badge=[...document.querySelectorAll('header span')].find(x=>/P\.O\.H\.A\.N\.G 2026/.test(x.textContent||''));
-  if(badge) badge.textContent=`P.O.H.A.N.G 2026 · v${VERSION} EVIDENCE FUSION`;
-  document.title=`Seoteuk Mate P.O.H.A.N.G v${VERSION} - Evidence Fusion · 3안 경쟁생성 · Antigravity DEV`;
+  if(badge) badge.textContent=`P.O.H.A.N.G 2026 · v${VERSION} ALL-IN-ONE`;
+  document.title=`Seoteuk Mate P.O.H.A.N.G v${VERSION} - All-in-One · Offline Tools · Admissions · Antigravity`;
 
   let action=$('sm28-version-actions');
   const group=$('version-tabs-group');
@@ -801,7 +801,7 @@ setTimeout(()=>{patchActions();patchVersionTexts();bindCategoryEvents();syncCate
 if(window.__SEOTEUK_V29_LOADED__) return;
 window.__SEOTEUK_V29_LOADED__=true;
 
-const VERSION='3.1.0';
+const VERSION='3.2.0';
 const AG_KEY='seoteukMate.antigravityDev.v1';
 const KNOWN_MODELS=[
  ['gemini-3.8-flash-high','Gemini 3.8 Flash (High)'],
@@ -1141,8 +1141,8 @@ function wrapAGFunctions(){
 }
 function patchVersion(){
   const badge=[...document.querySelectorAll('header span')].find(x=>/P\.O\.H\.A\.N\.G 2026/.test(x.textContent||''));
-  if(badge) badge.textContent=`P.O.H.A.N.G 2026 · v${VERSION} CLOUD WORKSPACE + GLOBAL PROGRESS`;
-  document.title=`Seoteuk Mate P.O.H.A.N.G v${VERSION} - Google Cloud · Student Workspace · Analytics · Global Progress`;
+  if(badge) badge.textContent=`P.O.H.A.N.G 2026 · v${VERSION} ALL-IN-ONE`;
+  document.title=`Seoteuk Mate P.O.H.A.N.G v${VERSION} - All-in-One · Cloud · Analytics · Admissions`;
 }
 function init(){
   patchVersion();
