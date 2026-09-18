@@ -1,4 +1,4 @@
-const CACHE='seoteukmate-v300-20260918';
+const CACHE='seoteukmate-v310-20260918';
 const CORE=['./','./index.html','./ai-providers.js','./rules-engine.js','./official-2026.js','./project-writer.js','./knowledge-pack.js','./evidence-fusion.js','./student-workspace.js','./analytics-dashboard.js','./firebase-cloud.js'];
 self.addEventListener('install',e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).catch(()=>{}));});
 self.addEventListener('activate',e=>{e.waitUntil((async()=>{for(const k of await caches.keys())if(k!==CACHE)await caches.delete(k);await self.clients.claim();})());});

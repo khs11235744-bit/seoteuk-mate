@@ -1,2 +1,2 @@
-Seoteuk Mate v3.0.0
-Google/Firebase sign-in wizard · Student/Class Workspace · Student Analytics Dashboard · cloud student records
+Seoteuk Mate v3.1.0
+Intuitive labeled menu · Firebase configured · Firestore secured · Student Workspace · Analytics

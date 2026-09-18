@@ -4,7 +4,7 @@
 if(window.__SEOTEUK_V28_LOADED__) return;
 window.__SEOTEUK_V28_LOADED__=true;
 
-const VERSION='2.8.0';
+const VERSION='3.1.0';
 const HISTORY_KEY='seoteukMate.v28.history';
 const REDO_KEY='seoteukMate.v28.redo';
 const ALT_KEY='seoteukMate.v28.alternatives';
@@ -736,10 +736,10 @@ function patchVersionTexts(){
     action.id='sm28-version-actions';
     action.className='flex items-center gap-1 flex-wrap';
     action.innerHTML=`<button id="sm28-gen" onclick="generateThreeCandidates()" class="text-xs px-2 py-1 bg-violet-600 text-white rounded-lg font-black">✨ 3안 생성</button>
-      <button onclick="undoSeoteuk()" class="text-xs px-2 py-1 border rounded-lg">↶</button>
-      <button onclick="redoSeoteuk()" class="text-xs px-2 py-1 border rounded-lg">↷</button>
-      <button onclick="openSeoteukHistory()" class="text-xs px-2 py-1 border rounded-lg">🕘 이력</button>
-      <button onclick="clearCurrentVersionSafely()" class="text-xs px-2 py-1 border rounded-lg text-rose-700">🗑</button>`;
+      <button onclick="undoSeoteuk()" class="text-xs px-2 py-1 border rounded-lg">↶ 되돌리기</button>
+      <button onclick="redoSeoteuk()" class="text-xs px-2 py-1 border rounded-lg">↷ 다시 실행</button>
+      <button onclick="openSeoteukHistory()" class="text-xs px-2 py-1 border rounded-lg">🕘 변경 이력</button>
+      <button onclick="clearCurrentVersionSafely()" class="text-xs px-2 py-1 border rounded-lg text-rose-700">🗑 비우기</button>`;
     box.appendChild(action);
   }
 
@@ -801,7 +801,7 @@ setTimeout(()=>{patchActions();patchVersionTexts();bindCategoryEvents();syncCate
 if(window.__SEOTEUK_V29_LOADED__) return;
 window.__SEOTEUK_V29_LOADED__=true;
 
-const VERSION='3.0.0';
+const VERSION='3.1.0';
 const AG_KEY='seoteukMate.antigravityDev.v1';
 const KNOWN_MODELS=[
  ['gemini-3.8-flash-high','Gemini 3.8 Flash (High)'],

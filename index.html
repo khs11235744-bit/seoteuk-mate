@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Seoteuk Mate P.O.H.A.N.G v3.0.0 - Google Cloud · Student Workspace · Analytics</title>
+  <title>Seoteuk Mate P.O.H.A.N.G v3.1.0 - Intuitive Menu · Google Cloud · Student Workspace · Analytics</title>
 
   <meta name="theme-color" content="#2563eb" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -123,6 +123,21 @@
       #main-viewport-frame.device-mode-desktop > .flex-1.flex > #panel-right { display: flex !important; }
     }
 
+    /* v3.1 intuitive labeled menu */
+    #sm-main-menu { display:flex; align-items:center; gap:6px; overflow-x:auto; scrollbar-width:none; }
+    #sm-main-menu::-webkit-scrollbar { display:none; }
+    .sm-menu-label { font-size:9px; font-weight:900; color:#94a3b8; letter-spacing:.08em; margin:0 2px; }
+    .sm-menu-btn { display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:7px 10px; border:1px solid #e2e8f0; border-radius:11px; background:#fff; color:#334155; font-size:11px; font-weight:800; white-space:nowrap; transition:.15s; }
+    .sm-menu-btn:hover { background:#eff6ff; border-color:#bfdbfe; color:#1d4ed8; }
+    .sm-menu-icon { width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; font-size:17px; line-height:1; flex:0 0 auto; }
+    .sm-menu-desc { display:none; }
+    @media (max-width:767px) {
+      #sm-main-menu-wrap { padding:6px 8px; }
+      .sm-menu-btn { min-height:38px; padding:7px 9px; }
+      .sm-menu-icon { width:20px; height:20px; font-size:18px; }
+      .sm-menu-label { display:none; }
+    }
+
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 h-screen overflow-hidden flex flex-col select-none">
@@ -136,7 +151,7 @@
       <div>
         <div class="flex items-center gap-1.5 flex-wrap">
           <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-900">Seoteuk Mate</h1>
-          <span class="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">P.O.H.A.N.G 2026 · v3.0.0 CLOUD WORKSPACE</span>
+          <span class="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">P.O.H.A.N.G 2026 · v3.1.0 INTUITIVE UI</span>
           <span id="ai-status-badge" class="text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 hidden md:inline-block">
             ⚡ 안티그래비티 패킷 모드
           </span>
@@ -195,6 +210,25 @@
       </button>
     </div>
   </header>
+
+  <!-- v3.1 INTUITIVE LABELED MENU -->
+  <div id="sm-main-menu-wrap" class="no-print flex-none bg-slate-50 border-b border-slate-200 px-3 sm:px-4 py-1.5 shadow-xs">
+    <div id="sm-main-menu">
+      <span class="sm-menu-label">작업</span>
+      <button type="button" class="sm-menu-btn" onclick="switchMainTab('editor')" title="교과·진로·자율·동아리 작성 화면"><span class="sm-menu-icon">✍️</span><span>세특 작성</span></button>
+      <button type="button" class="sm-menu-btn" onclick="openStudentWorkspace()" title="학급·학생 선택과 학생별 기록 관리"><span class="sm-menu-icon">👥</span><span>학생 관리</span></button>
+      <button type="button" class="sm-menu-btn" onclick="switchMainTab('interview')" title="세특 기반 질문 생성과 답변 분석"><span class="sm-menu-icon">🎙️</span><span>면접 연습</span></button>
+      <button type="button" class="sm-menu-btn" onclick="switchMainTab('coordinator')" title="지식팩 검색과 프로젝트 기획"><span class="sm-menu-icon">📚</span><span>지식·코디</span></button>
+      <button type="button" class="sm-menu-btn" onclick="switchMainTab('bulk')" title="엑셀 기반 다인수 일괄 생성"><span class="sm-menu-icon">🗂️</span><span>일괄 처리</span></button>
+
+      <span class="sm-menu-label">도구</span>
+      <button type="button" class="sm-menu-btn" onclick="openApiKeyModal()" title="Antigravity 모델과 API 연결 설정"><span class="sm-menu-icon">🤖</span><span>AI·모델</span></button>
+      <button type="button" class="sm-menu-btn" onclick="openCloudAccountModal()" title="Google 로그인과 클라우드 저장"><span class="sm-menu-icon">☁️</span><span>Google 로그인</span></button>
+      <button type="button" class="sm-menu-btn" onclick="openAnalyticsDashboard()" title="학생 기록 종합 분석 대시보드"><span class="sm-menu-icon">📊</span><span>종합 분석</span></button>
+      <button type="button" class="sm-menu-btn" onclick="document.getElementById('pdfUploadInput').click()" title="생기부·활동지 PDF 가져오기"><span class="sm-menu-icon">📄</span><span>PDF 가져오기</span></button>
+      <button type="button" class="sm-menu-btn" onclick="openUnivTipsModal()" title="면접·기재 팁과 사용 안내"><span class="sm-menu-icon">❓</span><span>도움말</span></button>
+    </div>
+  </div>
 
   <!-- MAIN WORKSPACE FRAME -->
   <div class="flex-1 bg-slate-200 overflow-hidden flex flex-col justify-center items-center p-0 md:p-2">
@@ -2884,9 +2918,9 @@ window.speakCurrentInterviewQ = function () {
 <script src="./rules-engine.js"></script>
 <script src="./official-2026.js"></script>
 <script src="./project-writer.js"></script>
-<script src="./evidence-fusion.js?v=3.0.0"></script>
-<script src="./student-workspace.js?v=3.0.0"></script>
-<script src="./analytics-dashboard.js?v=3.0.0"></script>
+<script src="./evidence-fusion.js?v=3.1.0"></script>
+<script src="./student-workspace.js?v=3.1.0"></script>
+<script src="./analytics-dashboard.js?v=3.1.0"></script>
 
 <script type="module" src="./firebase-cloud.js"></script>
 
