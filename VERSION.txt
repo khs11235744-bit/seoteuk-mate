@@ -1,2 +1,2 @@
-Seoteuk Mate v2.7.0
-Evidence Fusion · V1/V2/V3 competition · Undo/Redo/History · Safe context fusion
+Seoteuk Mate v2.8.0
+Progress UI · clean single-output parser · alternatives outside byte count · category topic selectors
