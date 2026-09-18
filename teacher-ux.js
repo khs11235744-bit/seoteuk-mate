@@ -168,7 +168,6 @@ window.openClassClosing33=function(){
 
 function enhanceMenu(){
  const menu=$('sm-main-menu');if(!menu)return;
- if(!$('sm33-spell-menu')){const local=[...menu.querySelectorAll('button')].find(b=>/로컬 도구/.test(b.textContent||''));const b=document.createElement('button');b.id='sm33-spell-menu';b.className='sm-menu-btn';b.type='button';b.onclick=window.openSpellCheck33;b.title='현재 문장의 맞춤법·띄어쓰기 수정 제안';b.innerHTML='<span class="sm-menu-icon">가✓</span><span>맞춤법·띄어쓰기</span>';local?.after(b)}
  if(!$('sm33-student-home-menu')){const students=[...menu.querySelectorAll('button')].find(b=>/학생 관리/.test(b.textContent||''));const b=document.createElement('button');b.id='sm33-student-home-menu';b.className='sm-menu-btn';b.type='button';b.onclick=window.openStudentHome33;b.title='현재 선택 학생의 기록·분석·면접·대입정보 홈';b.innerHTML='<span class="sm-menu-icon">🏠</span><span>학생 홈</span>';students?.after(b)}
  if(!$('sm33-closing-menu')){const bulk=[...menu.querySelectorAll('button')].find(b=>/일괄 처리/.test(b.textContent||''));const b=document.createElement('button');b.id='sm33-closing-menu';b.className='sm-menu-btn';b.type='button';b.onclick=window.openClassClosing33;b.title='학급 전체 미작성·바이트·검토 현황';b.innerHTML='<span class="sm-menu-icon">✅</span><span>학급 마감</span>';bulk?.after(b)}
 }
@@ -177,8 +176,8 @@ function patchAnalytics(){
  const wrapped=function(){old();setTimeout(()=>{const body=$('sm3-analytics-body');if(body&&!$('sm33-audit-tip')){const d=document.createElement('div');d.id='sm33-audit-tip';d.className='mb-3 p-3 rounded-2xl bg-blue-50 border border-blue-200 text-xs text-blue-900';d.innerHTML='<b>분석표 2.0:</b> 위 지표는 합격 가능성이나 학생 순위가 아니라 기록의 근거·과정·반복을 점검하는 교사용 참고 정보입니다. 현재 문장은 <button onclick="closeAnalyticsDashboard();openSpellCheck33()" class="underline font-black">맞춤법·띄어쓰기</button>에서 교정할 수 있습니다.';body.prepend(d)}},30)};wrapped.__sm33=true;window.openAnalyticsDashboard=wrapped;
 }
 function version(){
- const badge=[...document.querySelectorAll('header span')].find(x=>/P\.O\.H\.A\.N\.G 2026/.test(x.textContent||''));if(badge)badge.textContent='P.O.H.A.N.G 2026 · v3.3.0 TEACHER UX';
- document.title='Seoteuk Mate P.O.H.A.N.G v3.3.0 - Teacher UX · Offline · Admissions · Cloud';
+ const badge=[...document.querySelectorAll('header span')].find(x=>/P\.O\.H\.A\.N\.G 2026/.test(x.textContent||''));if(badge)badge.textContent='P.O.H.A.N.G 2026 · v3.4.0 LIVE CHECK';
+ document.title='Seoteuk Mate P.O.H.A.N.G v3.4.0 - Live Check · Teacher UX · Cloud';
 }
 function init(){injectStyle();modalRoot();ensureHeaderStatus();enhanceMenu();patchAnalytics();version();setTimeout(()=>{enhanceMenu();syncHeaderStatus()},1400)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,300));else setTimeout(init,300);

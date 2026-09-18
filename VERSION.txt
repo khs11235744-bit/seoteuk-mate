@@ -1,2 +1,2 @@
-Seoteuk Mate v3.3.0
-Teacher UX · visible login/logout · spelling/spacing review · student home · class close dashboard · admissions 2.0
+Seoteuk Mate v3.4.0
+Live editor check · integrated spacing/official rules · same-student/class similarity · Teacher UX · Cloud
