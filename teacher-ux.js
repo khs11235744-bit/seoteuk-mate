@@ -3,7 +3,7 @@
 'use strict';
 if(window.__SEOTEUK_TEACHER_UX_V35__) return;
 window.__SEOTEUK_TEACHER_UX_V35__=true;
-const VERSION='3.5.0';
+const VERSION='3.5.1';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??d}catch(_){return d}};
@@ -219,8 +219,8 @@ function patchAnalytics(){
  const wrapped=function(){old();setTimeout(()=>{const body=$('sm3-analytics-body');if(body&&!$('sm33-audit-tip')){const d=document.createElement('div');d.id='sm33-audit-tip';d.className='mb-3 p-3 rounded-2xl bg-blue-50 border border-blue-200 text-xs text-blue-900';d.innerHTML='<b>분석표 2.0:</b> 위 지표는 합격 가능성이나 학생 순위가 아니라 기록의 근거·과정·반복을 점검하는 교사용 참고 정보입니다. 현재 문장은 <button onclick="closeAnalyticsDashboard();openSpellCheck33()" class="underline font-black">맞춤법·띄어쓰기</button>에서 교정할 수 있습니다.';body.prepend(d)}},30)};wrapped.__sm33=true;window.openAnalyticsDashboard=wrapped;
 }
 function version(){
- const badge=[...document.querySelectorAll('header span')].find(x=>/P\.O\.H\.A\.N\.G 2026/.test(x.textContent||''));if(badge)badge.textContent='P.O.H.A.N.G 2026 · v3.5.0 STABLE';
- document.title='Seoteuk Mate P.O.H.A.N.G v3.5.0 - Stable · Live Check · Cloud';
+ const badge=[...document.querySelectorAll('header span')].find(x=>/P\.O\.H\.A\.N\.G 2026/.test(x.textContent||''));if(badge)badge.textContent='P.O.H.A.N.G 2026 · v3.5.1 STABLE';
+ document.title='Seoteuk Mate P.O.H.A.N.G v3.5.1 - Stable · Full Demo · Cloud';
 }
 function init(){injectStyle();modalRoot();ensureHeaderStatus();enhanceMenu();patchAnalytics();version();window.addEventListener('online',syncHeaderStatus);window.addEventListener('offline',syncHeaderStatus);setTimeout(()=>{enhanceMenu();syncHeaderStatus()},1400)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(init,300));else setTimeout(init,300);

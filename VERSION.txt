@@ -1,2 +1,2 @@
-Seoteuk Mate v3.5.0
-Stabilization · full-class cloud sync · conflict recovery · similarity refinement · smoke tests
+Seoteuk Mate v3.5.1
+Stable · Full fictional student source viewer · demo validation · cloud sync · live checks
