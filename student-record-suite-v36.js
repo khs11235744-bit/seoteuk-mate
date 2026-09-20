@@ -2,7 +2,7 @@
 (function(){
 'use strict';
 if(window.__SM36_SUITE__)return;window.__SM36_SUITE__=1;
-var V='3.6.0', $=function(id){return document.getElementById(id)}, esc=function(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var V='3.7.0', $=function(id){return document.getElementById(id)}, esc=function(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
 var META={all:['전체','▦'],course:['교과세특','✍️'],auto:['자율·자치활동','🏫'],club:['동아리활동','👥'],career:['진로활동','🎯'],behavior:['행동특성·종합의견','🌱']};
 var S=[
 {id:'a',no:'2103',name:'김서준(가상)',major:'건축공학과',icon:'🏗️',tag:'형태보다 구조·동선·사용 조건을 함께 묻는 학생',keys:['구조 안전','공간 분석','수학적 모델링','사용자 관점'],sum:'수학·물리 개념을 실제 공간 문제에 연결하고, 도면·모형·관찰 근거를 바탕으로 설계를 수정하는 흐름이 나타남.',growth:[

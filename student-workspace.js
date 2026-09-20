@@ -9,6 +9,7 @@ const APP_KEY='seoteukMate.webapp.v1';
 const CAT_DRAFT_KEY='seoteukMate.v28.categoryDrafts';
 const CAT_TOPIC_KEY='seoteukMate.v28.categoryTopics';
 const PROJECT_KEY='seoteukMate.projects.v25';
+const BEHAVIOR_KEY='seoteukMate.behavior.v36';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??d}catch(_){return d}};
@@ -32,6 +33,7 @@ function captureRecord(){
     appState:core,
     categoryDrafts:clone(load(CAT_DRAFT_KEY,{})),
     categoryTopics:clone(load(CAT_TOPIC_KEY,{})),
+    behaviorDrafts:clone(load(BEHAVIOR_KEY,{})),
     projectCards:clone(window.__projectCardsV25||load(PROJECT_KEY,[])),
     interviewQuestions:clone(window.interviewQuestions||[]),
     career:$('input-career')?.value||'',
@@ -48,7 +50,7 @@ function blankRecord(student){
   return{
     schemaVersion:3,
     appState:{activeCategory:'교과세특',activeSemester:'s1',activeVersion:'v1',activeSubject:window.activeSubject||'한국사',subjectList:clone(window.subjectList||[]),subjectData:blankSubjectData(),bulkStudents:[],schemaVersion:2,clientUpdatedAt:Date.now()},
-    categoryDrafts:{},categoryTopics:{},projectCards:[],interviewQuestions:[],
+    categoryDrafts:{},categoryTopics:{},behaviorDrafts:{s1:{v1:'',v2:'',v3:''},s2:{v1:'',v2:'',v3:''},full:{v1:'',v2:'',v3:''}},projectCards:[],interviewQuestions:[],
     career:student?.career||'',major:student?.major||'',savedAt:Date.now()
   }
 }
@@ -73,6 +75,7 @@ function applyRecord(rec){
   localStorage.setItem(CAT_DRAFT_KEY,JSON.stringify(r.categoryDrafts||{}));
   localStorage.setItem(CAT_TOPIC_KEY,JSON.stringify(r.categoryTopics||{}));
   localStorage.setItem(PROJECT_KEY,JSON.stringify(r.projectCards||[]));
+  localStorage.setItem(BEHAVIOR_KEY,JSON.stringify(r.behaviorDrafts||{s1:{v1:'',v2:'',v3:''},s2:{v1:'',v2:'',v3:''},full:{v1:'',v2:'',v3:''}}));
   window.__projectCardsV25=clone(r.projectCards||[]);
   window.interviewQuestions=clone(r.interviewQuestions||[]);
   if(typeof window.__applyCloudState==='function')window.__applyCloudState(r.appState||{});
@@ -146,7 +149,7 @@ function renderWorkspace(){
     const active=w.activeStudentId===s.id;
     const rec=records()[s.id];
     const count=countRecord(rec);
-    return `<div class="p-3 border rounded-2xl ${active?'border-cyan-400 bg-cyan-50':'border-slate-200'}"><div class="flex justify-between gap-2"><div><b>${esc(s.no||'')} ${esc(s.name)}</b><div class="text-[10px] text-slate-500">${esc(s.career||'진로 미입력')}</div></div><span class="text-[9px] px-2 py-1 rounded bg-white border">${count}개 기록</span></div><div class="grid grid-cols-2 gap-1 mt-3"><button onclick="activateWorkspaceStudent('${s.id}')" class="p-1.5 bg-blue-600 text-white rounded-lg text-xs font-black">${active?'선택됨':'작업 열기'}</button><button onclick="deleteWorkspaceStudent('${s.id}')" class="p-1.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-xs">삭제</button></div></div>`;
+    return `<div class="p-3 border rounded-2xl ${active?'border-cyan-400 bg-cyan-50':'border-slate-200'}"><div class="flex justify-between gap-2"><div><b>${esc(s.no||'')} ${esc(s.name)}</b><div class="text-[10px] text-slate-500">${esc(s.career||'진로 미입력')}</div></div><span class="text-[9px] px-2 py-1 rounded bg-white border">${count}개 기록</span></div><div class="grid grid-cols-3 gap-1 mt-3"><button onclick="activateWorkspaceStudent('${s.id}')" class="p-1.5 bg-blue-600 text-white rounded-lg text-xs font-black">${active?'선택됨':'작업 열기'}</button><button onclick="openStudentPortfolio37('${s.id}')" class="p-1.5 bg-violet-50 text-violet-800 border border-violet-200 rounded-lg text-xs font-black">학생부</button><button onclick="deleteWorkspaceStudent('${s.id}')" class="p-1.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-xs">삭제</button></div></div>`;
   }).join(''):'<div class="col-span-full p-8 text-center text-slate-400 text-xs">학생을 추가하거나 Excel을 가져오세요.</div>';
 }
 function countRecord(rec){
@@ -155,6 +158,8 @@ function countRecord(rec){
   for(const sub of Object.values(d))for(const sem of Object.values(sub||{}))for(const t of Object.values(sem||{}))if(String(t||'').trim())n++;
   const cd=rec.categoryDrafts||{};
   for(const cat of Object.values(cd))for(const sem of Object.values(cat||{}))for(const t of Object.values(sem||{}))if(String(t||'').trim())n++;
+  const bd=rec.behaviorDrafts||{};
+  for(const sem of Object.values(bd))for(const t of Object.values(sem||{}))if(String(t||'').trim())n++;
   return n;
 }
 window.openStudentWorkspace=()=>{ensureModal();renderWorkspace();const m=$('sm3-workspace-modal');m.classList.remove('hidden');m.classList.add('flex')};
