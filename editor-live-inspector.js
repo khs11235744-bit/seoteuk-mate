@@ -3,7 +3,7 @@
 'use strict';
 if(window.__SEOTEUK_LIVE_INSPECTOR_V35__) return;
 window.__SEOTEUK_LIVE_INSPECTOR_V35__=true;
-const VERSION='3.5.1';
+const VERSION='3.6.0';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const load=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'null')??d}catch(_){return d}};
@@ -197,8 +197,8 @@ function hideRedundantAuditButtons(){
 }
 function version(){
  const badge=[...document.querySelectorAll('header span')].find(x=>/P\.O\.H\.A\.N\.G 2026/.test(x.textContent||''));
- if(badge)badge.textContent='P.O.H.A.N.G 2026 · v3.5.1 STABLE';
- document.title='Seoteuk Mate P.O.H.A.N.G v3.5.1 - Stable · Full Demo · Teacher UX · Cloud';
+ if(badge)badge.textContent='P.O.H.A.N.G 2026 · v3.6.0 STABLE';
+ document.title='Seoteuk Mate P.O.H.A.N.G v3.6.0 - Student Record Suite · Teacher UX · Cloud';
 }
 function init(){
  ensureUI();patchProgrammaticChanges();hideRedundantAuditButtons();version();render();
