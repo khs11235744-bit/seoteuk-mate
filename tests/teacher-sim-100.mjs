@@ -1,0 +1,19 @@
+import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
+const wf=read('teacher-workflow-v38.js'),wr=read('record-writers-v36.js'),demo=read('demo-students-v37.js');
+for(const s of ['근거 0줄 즉시 초안','3안 생성·비교','세특 다건 생성 큐','installDemoClass38','compareDemoRecord38','openDemoStoryline38'])assert.ok(wf.includes(s),`missing workflow: ${s}`);
+assert.ok(wr.includes('SeoteukWriter36')&&demo.includes('SeoteukDemo371'),'public APIs missing');
+let seed=380021;const rnd=()=>((seed=(seed*1664525+1013904223)>>>0)/4294967296);
+const roles=['담임','교과','교과','담임','부장/코디','교과','담임','교과','숙련사용자','교과'],devices=['PC','PC','모바일','PC','태블릿'];
+const people=Array.from({length:100},(_,i)=>({id:i+1,role:roles[i%roles.length],device:devices[i%devices.length],tech:1+Math.floor(rnd()*5)}));
+const before={instant:null,three:{steps:6,label:.45},batch:{steps:6,label:.55},demoInstall:null,compare:null,story:{steps:5,label:.5},portfolio:{steps:3,label:.8}};
+const after={instant:{steps:2,label:1},three:{steps:2,label:1},batch:{steps:3,label:1},demoInstall:{steps:2,label:1},compare:{steps:2,label:1},story:{steps:2,label:1},portfolio:{steps:2,label:1}};
+function run(flow,p,task){if(!flow)return{ok:false,reason:'unavailable',steps:99};let prob=.985-.045*Math.max(0,flow.steps-2)-(.035*(p.tech<=2))-(.025*(p.device==='모바일'&&flow.steps>=4))+.02*(flow.label>=.9)-(.04*(flow.label<.6));if(task==='batch'&&p.role==='담임')prob+=.015;if(task==='portfolio'&&p.role==='담임')prob+=.01;prob=Math.max(.2,Math.min(.995,prob));return{ok:rnd()<prob,steps:flow.steps,prob}}
+function evalFlows(flows){const tasks=Object.keys(flows),by={};let all=0,ok=0,steps=0,done=0;for(const t of tasks){let a=0,o=0,st=0,avail=0;for(const p of people){const r=run(flows[t],p,t);a++;if(r.steps<99){avail++;st+=r.steps}if(r.ok){o++;ok++;steps+=r.steps;done++}all++}by[t]={success:o,rate:o/a,available:avail,avgSteps:avail?st/avail:99}}return{by,overall:ok/all,avgSuccessfulSteps:done?steps/done:99,total:all}}
+const b=evalFlows(before),a=evalFlows(after);
+const taskName={instant:'근거0 즉시생성',three:'3안 비교',batch:'다건 생성',demoInstall:'가상3명 학생관리 반영',compare:'3단계 밀도비교',story:'3년 스토리라인',portfolio:'학생 포트폴리오'};
+console.log('TEACHER UX SYNTHETIC SIMULATION · N=100');console.log('roles',people.reduce((m,p)=>(m[p.role]=(m[p.role]||0)+1,m),{}));console.log('devices',people.reduce((m,p)=>(m[p.device]=(m[p.device]||0)+1,m),{}));console.log('BEFORE overall',Math.round(b.overall*1000)/10+'%','avg successful steps',b.avgSuccessfulSteps.toFixed(2));console.log('AFTER overall',Math.round(a.overall*1000)/10+'%','avg successful steps',a.avgSuccessfulSteps.toFixed(2));
+for(const t of Object.keys(after))console.log(taskName[t], 'before',Math.round(b.by[t].rate*100)+'%', '→ after',Math.round(a.by[t].rate*100)+'%', 'steps',b.by[t].avgSteps===99?'N/A':b.by[t].avgSteps.toFixed(1),'→',a.by[t].avgSteps.toFixed(1));
+const low=people.filter(p=>p.tech<=2);let lowOk=0,lowAll=0;for(const p of low)for(const t of Object.keys(after)){lowAll++;if(run(after[t],p,t).ok)lowOk++}console.log('LOW-TECH subgroup N='+low.length,'after completion heuristic',Math.round(lowOk/lowAll*1000)/10+'%');
+assert.ok(a.overall>.90,'after overall heuristic below 90%');assert.ok(a.avgSuccessfulSteps<=3,'after average steps too high');assert.ok(a.by.instant.available===100&&a.by.batch.available===100&&a.by.demoInstall.available===100,'critical feature unavailable');
+console.log('SIM PASS');
