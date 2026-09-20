@@ -4,7 +4,7 @@
 if(window.__SEOTEUK_EVIDENCE_CORE_LOADED__) return;
 window.__SEOTEUK_EVIDENCE_CORE_LOADED__=true;
 
-const VERSION='3.5.1';
+const VERSION='3.8.2';
 const HISTORY_KEY='seoteukMate.v28.history';
 const REDO_KEY='seoteukMate.v28.redo';
 const ALT_KEY='seoteukMate.v28.alternatives';
@@ -178,6 +178,7 @@ function progressSet(value,label,detail,cap=value){
   $('sm28-progress-pct').textContent=progressValue+'%';
   if(label) $('sm28-progress-label').textContent=label;
   if(detail) $('sm28-progress-detail').textContent=detail;
+  if(typeof paintProgressStages==='function') paintProgressStages(progressValue);
 }
 function progressStart(label='AI 생성 준비'){
   clearInterval(progressTimer);
@@ -192,8 +193,8 @@ function progressStart(label='AI 생성 준비'){
 }
 function progressDone(label='완료'){
   clearInterval(progressTimer);
-  progressSet(100,label,'결과 저장 완료',100);
-  setTimeout(()=>ensureProgress().classList.add('hidden'),900);
+  progressSet(100,label,'결과가 화면과 저장 상태에 반영되었습니다.',100);
+  setTimeout(()=>ensureProgress().classList.add('hidden'),1900);
 }
 function progressFail(msg='생성 실패'){
   clearInterval(progressTimer);
@@ -801,7 +802,7 @@ setTimeout(()=>{patchActions();patchVersionTexts();bindCategoryEvents();syncCate
 if(window.__SEOTEUK_MODEL_PROGRESS_LOADED__) return;
 window.__SEOTEUK_MODEL_PROGRESS_LOADED__=true;
 
-const VERSION='3.5.1';
+const VERSION='3.8.2';
 const AG_KEY='seoteukMate.antigravityDev.v1';
 const KNOWN_MODELS=[
  ['gemini-3.8-flash-high','Gemini 3.8 Flash (High)'],
@@ -829,15 +830,36 @@ function ensureProgress(){
   p=document.createElement('div');
   p.id='sm28-progress';
   p.className='hidden fixed left-1/2 -translate-x-1/2 top-14 z-[210] w-[min(92vw,660px)] no-print';
-  p.innerHTML=`<div class="bg-white/95 backdrop-blur border border-blue-200 rounded-2xl shadow-xl p-3">
-    <div class="flex items-center justify-between gap-3 mb-2">
-      <div class="min-w-0"><div id="sm28-progress-label" class="text-xs font-black text-slate-900 truncate">작업 준비</div><div id="sm28-progress-detail" class="text-[10px] text-slate-500 truncate">진행 중입니다.</div></div>
-      <div id="sm28-progress-pct" class="text-sm font-black text-blue-700">0%</div>
+  p.innerHTML=`<div class="bg-white/97 backdrop-blur border border-blue-200 rounded-2xl shadow-xl p-3.5">
+    <div class="flex items-center justify-between gap-3">
+      <div class="min-w-0 flex-1"><div id="sm28-progress-label" class="text-sm font-black text-slate-900 truncate">작업 준비</div><div id="sm28-progress-detail" class="text-[11px] text-slate-500 truncate mt-0.5">진행 중입니다.</div></div>
+      <div class="text-right"><div id="sm28-progress-pct" class="text-2xl leading-none font-black text-blue-700">0%</div><div id="sm28-progress-status" class="text-[9px] font-black text-blue-500 mt-1">준비</div></div>
     </div>
-    <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden"><div id="sm28-progress-bar" class="h-full bg-blue-600 rounded-full transition-all duration-500" style="width:0%"></div></div>
+    <div class="mt-3 h-3 bg-slate-100 rounded-full overflow-hidden"><div id="sm28-progress-bar" class="h-full bg-blue-600 rounded-full transition-all duration-500" style="width:0%"></div></div>
+    <div id="sm28-progress-stages" class="grid grid-cols-5 gap-1 mt-2 text-[9px] font-black">
+      <span data-stage="1" class="px-1.5 py-1 rounded-lg text-center bg-slate-100 text-slate-400">① 분석</span>
+      <span data-stage="2" class="px-1.5 py-1 rounded-lg text-center bg-slate-100 text-slate-400">② 준비</span>
+      <span data-stage="3" class="px-1.5 py-1 rounded-lg text-center bg-slate-100 text-slate-400">③ 생성</span>
+      <span data-stage="4" class="px-1.5 py-1 rounded-lg text-center bg-slate-100 text-slate-400">④ 검증</span>
+      <span data-stage="5" class="px-1.5 py-1 rounded-lg text-center bg-slate-100 text-slate-400">⑤ 완료</span>
+    </div>
   </div>`;
   document.body.appendChild(p);
   return p;
+}
+function progressStage(v){
+  if(v>=100)return 5;if(v>=78)return 4;if(v>=42)return 3;if(v>=18)return 2;return 1;
+}
+function paintProgressStages(v){
+  const current=progressStage(v),status=$('sm28-progress-status');
+  const names=['','분석','준비','생성','검증','완료'];
+  if(status)status.textContent=names[current];
+  const box=$('sm28-progress-stages');if(!box)return;
+  [...box.querySelectorAll('[data-stage]')].forEach(el=>{
+    const n=Number(el.dataset.stage||0),done=n<current,now=n===current;
+    el.className='px-1.5 py-1 rounded-lg text-center '+(done?'bg-emerald-50 text-emerald-700 border border-emerald-200':now?'bg-blue-50 text-blue-700 border border-blue-200':'bg-slate-100 text-slate-400');
+    const raw=el.textContent.replace(/^✓\s*/,'');el.textContent=(done?'✓ ':'')+raw;
+  });
 }
 function gpSet(v,label,detail){
   const p=ensureProgress();
@@ -847,6 +869,7 @@ function gpSet(v,label,detail){
   $('sm28-progress-pct').textContent=autoValue+'%';
   if(label) $('sm28-progress-label').textContent=label;
   if(detail) $('sm28-progress-detail').textContent=detail;
+  paintProgressStages(autoValue);
 }
 function inferLabel(prompt){
   const p=String(prompt||'');
@@ -867,10 +890,10 @@ function gpStart(label,detail){
     }
   },900);
 }
-function gpDone(label='완료'){
+function gpDone(label='완료',detail='결과 화면에 반영되었습니다.'){
   clearInterval(autoTimer);
-  gpSet(100,label,'작업이 완료되었습니다.');
-  setTimeout(()=>ensureProgress().classList.add('hidden'),850);
+  gpSet(100,label,detail);
+  setTimeout(()=>ensureProgress().classList.add('hidden'),1900);
 }
 function gpFail(label='작업 실패'){
   clearInterval(autoTimer);
@@ -918,7 +941,9 @@ window.SeoteukProgress={
   set:(v,label,detail)=>gpSet(v,label,detail),
   done:label=>gpDone(label),
   fail:label=>gpFail(label),
-  visible:()=>panelBusy()
+  visible:()=>panelBusy(),
+  value:()=>autoValue,
+  stage:()=>progressStage(autoValue)
 };
 
 function wrapAIRequest(){
@@ -961,6 +986,9 @@ function installProgressCoverage(){
   wrapAsync('extractInterviewQuestionsFromOcr','🎙️ 면접 질문 생성 중','세특을 분석해 질문 5개를 만드는 중입니다.');
   wrapAsync('evaluateInterviewAnswer','🧑‍⚖️ 면접 답변 분석 중','답변을 평가하고 피드백을 만드는 중입니다.');
   wrapAsync('generateKnowledgeFromVault','📚 지식팩 검색·생성 중','내장 지식팩과 첨부 자료를 검색하고 있습니다.');
+  wrapAsync('generateFromEvidence28','🧩 근거 기반 3안 생성 중','입력 근거를 정리하고 세 가지 후보 문장을 만드는 중입니다.');
+  wrapAsync('generateThreeCandidates','✨ 문맥 융합 3안 생성 중','근거·교과 맥락·기재 규칙을 반영해 후보를 생성합니다.');
+  wrapAsync('generateFromSubjectWriter','✍️ 교과별 작성기 생성 중','성취기준·관찰·산출물·피드백을 종합하고 있습니다.');
   wrapAsync('handlePdfUpload','📄 PDF 분석 중','페이지에서 텍스트를 추출하고 있습니다.');
   wrapAsync('testCurrentApiKeyConnection','🔌 AI 연결 테스트 중','실제 생성 요청으로 연결 상태를 확인합니다.');
   wrapAsync('testAntigravityGeneration','⚡ Antigravity 생성 테스트 중','선택 모델로 실제 문장을 생성하고 있습니다.');

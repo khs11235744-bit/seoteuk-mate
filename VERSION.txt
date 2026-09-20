@@ -1,2 +1,2 @@
-Seoteuk Mate v3.8.1
-Area evaluator · evidence check · multi-activity Excel grouping · exact subject sync · rapid batch · cloud sync
+Seoteuk Mate v3.8.2
+Smart Excel mapping · whole-record evaluation · evidence-locked quality pipeline · visual progress · cloud sync
