@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Seoteuk Mate Lite · Local A.X</title>
+<meta name="theme-color" content="#1f5eff">
+<script src="./runtime-mode.js?v=3.9.1"></script>
+<link rel="stylesheet" href="./lite-core.css?v=3.9.1">
+</head>
+<body>
+<div class="sm-shell">
+  <header class="sm-head">
+    <div class="sm-brand">
+      <h1>Seoteuk Mate <span id="mode-title">Lite</span></h1>
+      <p id="mode-desc">학생 근거 → 로컬 초안 → 규칙검증 → 교사 확정</p>
+    </div>
+    <div class="sm-badges">
+      <span id="local-badge" class="badge">A.X 확인 중</span>
+      <span id="flow-badge" class="badge">FLOW 확인 중</span>
+      <span id="privacy-badge" class="badge local">Local-first</span>
+    </div>
+  </header>
+
+  <div id="local-privacy-note" class="notice">
+    Local-only 모드에서는 학생 입력·생성문을 외부 AI에 보내지 않습니다. KHS Flow에는 프로젝트 상태와 작업 종류만 전달합니다.
+  </div>
+
+  <nav class="sm-tabs">
+    <button data-tab="single" class="on">학생 1명</button>
+    <button data-tab="batch">일괄 생성</button>
+    <button data-tab="saved">저장본</button>
+    <a href="./index.html" class="btn soft" style="text-decoration:none;margin-left:auto">Full 앱</a>
+  </nav>
+
+  <section id="tab-single" class="tab on">
+    <div class="sm-grid">
+      <div class="card">
+        <div class="card-h"><h2>학생 실제 근거</h2><span id="evidence-badge" class="badge">근거 0</span></div>
+        <div class="card-b">
+          <div class="fgrid">
+            <div class="field"><label>학번</label><input id="f-no" autocomplete="off"></div>
+            <div class="field"><label>이름</label><input id="f-name" autocomplete="off"></div>
+            <div class="field"><label>과목</label><input id="f-subject" value="한국사"></div>
+            <div class="field"><label>영역</label>
+              <select id="f-category">
+                <option>교과세특</option><option>자율활동</option><option>동아리활동</option><option>진로활동</option><option>행동특성·종합의견</option>
+              </select>
+            </div>
+            <div class="field full"><label>희망 진로(선택)</label><input id="f-career"></div>
+            <div class="field full"><label>성취기준 / 수업 목표</label><textarea id="f-standard"></textarea></div>
+            <div class="field full"><label>실제 수업 활동</label><textarea id="f-activity" placeholder="수업에서 실제로 무엇을 했는지"></textarea></div>
+            <div class="field full"><label>교사 직접 관찰</label><textarea id="f-observation" placeholder="학생의 행동·발언·사고과정 중 직접 확인한 것"></textarea></div>
+            <div class="field"><label>산출물</label><textarea id="f-output"></textarea></div>
+            <div class="field"><label>학생 역할</label><textarea id="f-role"></textarea></div>
+            <div class="field full"><label>실제 사용 자료 / 사료</label><textarea id="f-sources"></textarea></div>
+            <div class="field full"><label>피드백·수정·성장</label><textarea id="f-feedback"></textarea></div>
+            <div class="field"><label>후속 질문</label><textarea id="f-followup"></textarea></div>
+            <div class="field"><label>기타 관찰 메모</label><textarea id="f-notes"></textarea></div>
+            <div class="field"><label>목표 Byte</label><input id="f-target" type="number" min="300" max="1500" value="1500"></div>
+          </div>
+          <div class="actions">
+            <button id="btn-generate" class="btn primary">로컬 A.X 생성</button>
+            <button id="btn-clear" class="btn soft">입력 비우기</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h2>교사 검토용 초안</h2><span id="speed-badge" class="badge">대기</span></div>
+        <textarea id="result-text" class="result" placeholder="생성 결과가 여기에 표시됩니다. 직접 수정할 수 있습니다."></textarea>
+        <div class="meter"><span>NEIS 분량 <strong id="byte-count">0B</strong></span><span id="target-label">/ 1500B</span></div>
+        <div id="validation-box" class="checks">아직 검증하지 않았습니다.</div>
+        <div class="card-b">
+          <div class="actions">
+            <button id="btn-improve" class="btn dark">근거 안에서 다시 다듬기</button>
+            <button id="btn-validate" class="btn soft">규칙 재검증</button>
+            <button id="btn-copy" class="btn soft">복사</button>
+            <button id="btn-save" class="btn good">로컬 저장</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-batch" class="tab">
+    <div class="card">
+      <div class="card-h"><h2>일괄 생성</h2><span id="batch-summary" class="badge">0명</span></div>
+      <div class="card-b">
+        <div class="notice">CSV 또는 XLSX의 열 이름을 자동 매핑합니다. 권장 열: 학번, 이름, 과목, 영역, 희망진로, 성취기준, 실제수업활동, 교사관찰, 산출물, 역할, 사용자료, 피드백, 후속질문.</div>
+        <div class="batch-toolbar">
+          <input id="batch-file" type="file" accept=".csv,.xlsx,.xls">
+          <button id="btn-batch-run" class="btn primary">전체 로컬 생성</button>
+          <button id="btn-batch-export" class="btn soft">결과 CSV 저장</button>
+        </div>
+        <div class="progress"><i id="batch-progress"></i></div>
+        <div class="scroll"><table class="batch-table"><thead><tr><th>#</th><th>학생</th><th>과목</th><th>근거</th><th>상태</th><th>Byte</th><th>결과</th></tr></thead><tbody id="batch-body"></tbody></table></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-saved" class="tab">
+    <div class="card">
+      <div class="card-h"><h2>이 PC에 저장된 초안</h2><button id="btn-refresh-saved" class="btn soft">새로고침</button></div>
+      <div id="saved-list"></div>
+    </div>
+  </section>
+
+  <footer>Seoteuk Mate Local Pack v3.9 · A.X 7B 6K · evidence-first · teacher review required</footer>
+</div>
+
+<script src="./flow-bridge.js?v=3.9.1"></script>
+<script src="./official-lite.js?v=3.9.1"></script>
+<script src="./evaluator-lite.js?v=3.9.1"></script>
+<script src="./local-core.js?v=3.9.1"></script>
+<script src="./lite-app.js?v=3.9.1"></script>
+</body>
+</html>

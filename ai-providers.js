@@ -12,10 +12,10 @@
     openai:{label:'OpenAI', keyLabel:'OpenAI API Key', keyPlaceholder:'sk-...', model:'gpt-5.6-luna', help:'OpenAI Responses API. 가능하면 배포 서버 프록시를 사용합니다.'},
     claude:{label:'Claude', keyLabel:'Anthropic API Key', keyPlaceholder:'sk-ant-...', model:'claude-sonnet-5', help:'Anthropic Messages API. 가능하면 배포 서버 프록시를 사용합니다.'},
     deepseek:{label:'DeepSeek', keyLabel:'DeepSeek API Key', keyPlaceholder:'sk-...', model:'deepseek-flash', help:'DeepSeek OpenAI-compatible Chat API를 사용합니다.'},
-    custom:{label:'Ollama / Custom', keyLabel:'API Key (Ollama는 비워도 됨)', keyPlaceholder:'선택 사항', model:'qwen3:8b', help:'로컬 Ollama 또는 OpenAI-compatible endpoint에 직접 연결합니다.'}
+    custom:{label:'Ollama / Custom', keyLabel:'API Key (Ollama는 비워도 됨)', keyPlaceholder:'선택 사항', model:'khs-ax7b6k:latest', help:'로컬 Ollama 또는 OpenAI-compatible endpoint에 직접 연결합니다.'}
   };
   const BASE_DEFAULTS={
-    custom:'http://127.0.0.1:11434',
+    custom:(['127.0.0.1','localhost'].includes(location.hostname)&&location.port==='8767')?location.origin+'/ollama':'http://127.0.0.1:11434',
     openai:'https://api.openai.com/v1',
     claude:'https://api.anthropic.com/v1',
     deepseek:'https://api.deepseek.com',
@@ -25,8 +25,10 @@
   function readStore(){
     let s={}; try{s=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')||{};}catch(_){s={};}
     s.keys=Object.assign({gemini:'',openai:'',claude:'',deepseek:'',custom:''},s.keys||{});
-    s.models=Object.assign({gemini:'gemini-2.5-flash',openai:'gpt-5.6-luna',claude:'claude-sonnet-5',deepseek:'deepseek-flash',custom:'qwen3:8b'},s.models||{});
+    s.models=Object.assign({gemini:'gemini-2.5-flash',openai:'gpt-5.6-luna',claude:'claude-sonnet-5',deepseek:'deepseek-flash',custom:'khs-ax7b6k:latest'},s.models||{});
+    if(s.models.custom==='qwen3:8b') s.models.custom='khs-ax7b6k:latest';
     s.baseUrls=Object.assign({},BASE_DEFAULTS,s.baseUrls||{});
+    if(['127.0.0.1','localhost'].includes(location.hostname)&&location.port==='8767') s.baseUrls.custom=location.origin+'/ollama';
     s.customApiType=s.customApiType||'ollama';
     s.preferProxy=s.preferProxy!==false;
     return s;
@@ -172,7 +174,7 @@
     const model=store.models.custom||PROVIDERS.custom.model;
     if((store.customApiType||'ollama')==='ollama'){
       const msg={role:'user',content:prompt}; if(image?.data) msg.images=[image.data];
-      const r=await fetch(base+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model,messages:[msg],stream:false})});
+      const r=await fetch(base+'/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model,messages:[msg],stream:false,keep_alive:'2m',options:{num_ctx:6144,temperature:0.12,top_p:0.9,repeat_penalty:1.05}})});
       const d=await r.json(); if(!r.ok) throw new Error(d?.error||`Ollama ${r.status}`); return d.message?.content?.trim()||d.response?.trim()||'';
     }
     const headers={'Content-Type':'application/json'}; if(store.keys.custom) headers.Authorization=`Bearer ${store.keys.custom}`;

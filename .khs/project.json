@@ -1,0 +1,46 @@
+{
+  "projectId": "seoteuk",
+  "name": "Seoteuk Mate",
+  "version": "3.9.0-dev",
+  "root": "C:\\Users\\권형석\\Documents\\ChatGPT\\seoteuk-mate-v3.8.2",
+  "mode": "school",
+  "dirtyPolicy": "preserve",
+  "forbidden": [
+    "git reset",
+    "git clean",
+    "git stash",
+    "git rebase"
+  ],
+  "workers": {
+    "localBrain": {
+      "model": "khs-ax7b6k:latest",
+      "roles": [
+        "record-generation",
+        "rewrite",
+        "bounded-review"
+      ]
+    },
+    "localVision": {
+      "model": "khs-gemma-vision:latest",
+      "roles": [
+        "image-review"
+      ]
+    },
+    "webchat": {
+      "roles": [
+        "complex-review",
+        "fallback"
+      ]
+    }
+  },
+  "dataPolicy": {
+    "flowMetadataOnly": true,
+    "neverSendStudentContentToFlow": true,
+    "localOnlyModeNoCloudAI": true
+  },
+  "variants": [
+    "full",
+    "lite",
+    "local-only"
+  ]
+}

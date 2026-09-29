@@ -1,0 +1,1 @@
+@echo off\r\npowershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0Start-SeoteukLocal.ps1" -Mode lite\r\n
