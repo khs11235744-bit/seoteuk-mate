@@ -129,7 +129,7 @@ function ensureModal(){
   m.innerHTML=`<div class="w-full max-w-6xl h-[90vh] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
     <div class="px-5 py-4 border-b flex justify-between"><div><h3 class="font-black">👥 학생·학급 워크스페이스</h3><p class="text-[11px] text-slate-500 mt-1">학생을 선택하면 교과·진로·자율·동아리 작성 상태가 학생별로 분리됩니다.</p></div><button onclick="closeStudentWorkspace()" class="w-9 h-9 rounded-xl bg-slate-100 font-black">✕</button></div>
     <div class="flex-1 min-h-0 grid md:grid-cols-[300px_1fr]">
-      <div class="border-r p-3 overflow-y-auto"><div class="flex gap-2"><button onclick="addWorkspaceClass()" class="flex-1 p-2 bg-blue-600 text-white rounded-xl text-xs font-black">+ 학급</button><label class="flex-1 p-2 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-black text-center cursor-pointer">Excel<input id="sm3-roster-file" type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="importWorkspaceRoster(event)"></label></div><div id="sm3-class-list" class="mt-3 space-y-2"></div></div>
+      <div class="border-r p-3 overflow-y-auto"><div class="grid gap-2"><label class="w-full p-3 bg-blue-600 text-white rounded-xl text-xs font-bold text-center cursor-pointer">학생 명단 Excel·CSV 가져오기<input id="sm3-roster-file" type="file" accept=".xlsx,.xls,.csv" class="hidden" onchange="importWorkspaceRoster(event)"></label><div class="grid grid-cols-2 gap-2"><button onclick="downloadWorkspaceTemplate39()" class="p-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold">양식 다운로드</button><button onclick="addWorkspaceClass()" class="p-2 bg-white border border-slate-300 text-slate-700 rounded-xl text-xs font-semibold">+ 학급 직접 추가</button></div><p class="text-[11px] leading-5 text-slate-500">이름·성명, 번호·학번, 학급·반, 희망진로·학과 열을 자동으로 찾습니다. 학급을 먼저 만들 필요가 없습니다.</p></div><div id="sm3-class-list" class="mt-3 space-y-2"></div></div>
       <div class="p-4 overflow-y-auto"><div class="flex flex-wrap gap-2 justify-between items-center"><div><b id="sm3-selected-class-title">학급을 선택하세요</b><div id="sm3-selected-class-sub" class="text-[10px] text-slate-500"></div></div><div class="flex gap-2"><button onclick="addWorkspaceStudent()" class="px-3 py-2 bg-cyan-600 text-white rounded-xl text-xs font-black">+ 학생</button><button onclick="exportWorkspaceRoster()" class="px-3 py-2 bg-slate-100 rounded-xl text-xs font-bold">Excel 내보내기</button></div></div><div id="sm3-student-grid" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-2 mt-4"></div></div>
     </div>
   </div>`;
@@ -181,20 +181,43 @@ window.deleteWorkspaceStudent=async id=>{
   w.students=w.students.filter(x=>x.id!==id);if(w.activeStudentId===id)w.activeStudentId='';putWs(w);
   const r=records();delete r[id];putRecords(r);await window.SeoteukCloud?.deleteStudentRecord?.(id).catch(()=>{});paintActiveStudent();renderWorkspace();
 };
+window.downloadWorkspaceTemplate39=()=>{
+  if(!window.XLSX)return window.showToast?.('Excel 모듈을 불러오지 못했습니다.','warning');
+  const rows=[{학급:'2학년 1반',번호:'1',이름:'홍길동',희망진로:'역사학',목표학과:'사학과'},{학급:'2학년 1반',번호:'2',이름:'김하늘',희망진로:'',목표학과:''}];
+  const wsx=XLSX.utils.json_to_sheet(rows),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,wsx,'학생명단');XLSX.writeFile(wb,'SeoteukMate_학생명단_양식.xlsx');
+};
 window.importWorkspaceRoster=async event=>{
   const file=event.target.files?.[0];if(!file)return;
-  const classId=load('seoteukMate.workspaceSelectedClass','')||ws().classes[0]?.id;if(!classId){alert('학급을 먼저 추가하세요.');event.target.value='';return}
-  window.SeoteukProgress?.start?.('📥 학생 명렬 가져오기','Excel/CSV를 읽고 있습니다.');
+  window.SeoteukProgress?.start?.('학생 명단 가져오기','Excel/CSV의 학급·번호·이름 열을 확인하고 있습니다.');
   try{
     const buf=await file.arrayBuffer();const wb=XLSX.read(buf,{type:'array'});const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});
-    const w=ws();for(const row of rows){
-      const name=String(row['이름']||row['성명']||row['name']||'').trim();if(!name)continue;
-      const no=String(row['번호']||row['학번']||row['no']||'').trim();
-      const career=String(row['진로']||row['희망진로']||'').trim();const major=String(row['학과']||row['목표학과']||'').trim();
-      if(!w.students.some(s=>s.classId===classId&&String(s.no)===no&&s.name===name))w.students.push({id:uid(),classId,no,name,career,major,createdAt:Date.now()});
+    const w=ws();let added=0,skipped=0,firstClassId='';
+    let fallbackId=load('seoteukMate.workspaceSelectedClass','')||w.classes[0]?.id||'';
+    for(const row of rows){
+      const name=String(row['이름']||row['성명']||row['학생명']||row['name']||'').trim();if(!name){skipped++;continue}
+      const className=String(row['학급']||row['반']||row['학급명']||'').trim();
+      const grade=String(row['학년']||'').trim();
+      let classId=fallbackId;
+      if(className){
+        let cls=w.classes.find(x=>String(x.name||'').trim()===className);
+        if(!cls){cls={id:'c_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,5),name:className,year:String(new Date().getFullYear()),grade};w.classes.push(cls)}
+        classId=cls.id;
+      } else if(!classId){
+        const cls={id:'c_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,5),name:'가져온 학급',year:String(new Date().getFullYear()),grade};w.classes.push(cls);classId=cls.id;fallbackId=classId;
+      }
+      if(!firstClassId)firstClassId=classId;
+      const no=String(row['번호']||row['학번']||row['학생번호']||row['No']||row['no']||'').trim();
+      const career=String(row['희망진로']||row['진로']||row['희망직업']||'').trim();
+      const major=String(row['목표학과']||row['희망학과']||row['학과']||row['전공']||'').trim();
+      const initialObservation=String(row['관찰기록']||row['활동내용']||row['수업관찰']||row['메모']||'').trim();
+      const dup=w.students.some(s=>s.classId===classId&&s.name===name&&(!no||String(s.no||'')===no));
+      if(dup){skipped++;continue}
+      w.students.push({id:uid(),classId,no,name,career,major,initialObservation,createdAt:Date.now(),importSource:file.name});added++;
     }
-    putWs(w);renderWorkspace();window.SeoteukProgress?.done?.('명렬 가져오기 완료');
-  }catch(e){window.SeoteukProgress?.fail?.('명렬 가져오기 실패');alert(e.message)}
+    save('seoteukMate.workspaceSelectedClass',firstClassId||fallbackId);putWs(w);renderWorkspace();
+    window.SeoteukProgress?.done?.('학생 명단 가져오기 완료',added+'명 추가 · '+skipped+'행 건너뜀');
+    window.showToast?.(added+'명의 학생을 불러왔습니다.','success');
+  }catch(e){window.SeoteukProgress?.fail?.('학생 명단 가져오기 실패');alert('Excel/CSV 첫 행의 열 이름을 확인해 주세요.\n'+e.message)}
   finally{event.target.value=''}
 };
 window.exportWorkspaceRoster=()=>{

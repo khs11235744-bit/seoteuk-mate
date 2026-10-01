@@ -139,6 +139,21 @@
     }
 
   </style>
+<style id="sm39-editorial-fix">
+body > header > div:nth-child(2){display:none!important}
+body > header > div:last-child > *:not(#btn-cloud-account):not(#btn-student-workspace):not(#sm37-home-chip):not(#sm37-mode-chip){display:none!important}
+body > header{box-shadow:none!important}
+body > header h1{font-weight:750!important}
+#sm-main-menu .sm-menu-btn{font-size:12px;font-weight:650;min-height:40px}
+#sm-main-menu .sm-menu-label{font-size:10px;font-weight:700}
+#sm36writers .font-black{font-weight:700!important}
+#sm36writers .text-\[10px\]{font-size:11px!important}
+#sm36writers .text-\[11px\]{font-size:12px!important}
+#ai-status-badge,.ag-dev-strip{display:none!important}
+#sm37-home .sm37-grid button:nth-child(2){order:-1}
+#sm37-home .mt-4.flex.flex-wrap.justify-center.gap-2 > button:nth-child(1),#sm37-home .mt-4.flex.flex-wrap.justify-center.gap-2 > button:nth-child(2),#sm37-home .mt-4.flex.flex-wrap.justify-center.gap-2 > button:nth-child(5){display:none!important}
+@media(max-width:767px){button,label[for]{min-height:44px}}
+</style>
 </head>
 <body class="bg-slate-100 text-slate-800 h-screen overflow-hidden flex flex-col select-none">
 
@@ -151,7 +166,7 @@
       <div>
         <div class="flex items-center gap-1.5 flex-wrap">
           <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-slate-900">Seoteuk Mate</h1>
-          <span class="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">P.O.H.A.N.G 2026 · v3.8.2</span>
+          <span class="text-[9px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">2026 · v3.9</span>
           <span id="ai-status-badge" class="text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 hidden md:inline-block">
             ⚡ 안티그래비티 패킷 모드
           </span>
@@ -267,10 +282,10 @@
 
           <div class="flex border-b border-slate-100 bg-slate-50/80 p-1.5 gap-1 text-xs font-bold">
             <button id="left-tab-chat" type="button" onclick="switchLeftPanel('chat')" class="flex-1 py-1.5 rounded-md bg-white text-blue-700 shadow-xs text-center transition-all">
-              🤖 AI 생성 & 촌철살인
+              작성 도우미
             </button>
             <button id="left-tab-macro" type="button" onclick="switchLeftPanel('macro')" class="flex-1 py-1.5 rounded-md text-slate-500 hover:text-slate-800 text-center transition-all">
-              ⚡ 6대 계열 바이블 매크로
+              계열별 표현 참고
             </button>
           </div>
 
@@ -2939,5 +2954,38 @@ window.speakCurrentInterviewQ = function () {
 
 <script type="module" src="./firebase-cloud.js"></script>
 
+<script id="sm39-advanced-collapse">
+(function(){
+  function patchAdvanced(){
+    var box=document.getElementById('sm38-writer-tools');
+    if(!box || box.parentElement && box.parentElement.id==='sm39-advanced-details') return;
+    var d=document.createElement('details');
+    d.id='sm39-advanced-details';
+    d.className='mt-3 rounded-xl border border-slate-200 bg-slate-50';
+    var s=document.createElement('summary');
+    s.className='cursor-pointer px-3 py-2.5 text-xs font-semibold text-slate-600';
+    s.textContent='고급 작성 도구';
+    box.parentNode.insertBefore(d,box);
+    d.appendChild(s);
+    d.appendChild(box);
+    box.className='m-2 p-3 rounded-xl border border-violet-200 bg-violet-50';
+  }
+  new MutationObserver(function(){setTimeout(patchAdvanced,0)}).observe(document.documentElement,{subtree:true,childList:true});
+  [500,1300,2500].forEach(function(ms){setTimeout(patchAdvanced,ms)});
+})();
+</script>
+<script id="sm39-version-lock">
+(function(){
+  function apply39(){
+    var h=document.querySelector('body > header');
+    if(!h)return;
+    var badge=[].slice.call(h.querySelectorAll('span')).find(function(x){return /P\.O\.H\.A\.N\.G 2026|v3\.8\.2 STABLE|STUDENT RECORD SUITE|ALL-IN-ONE/.test(x.textContent||'')});
+    if(badge){badge.textContent='2026 · v3.9';badge.className='text-[11px] font-semibold px-2 py-1 rounded-lg bg-slate-100 text-slate-600 border border-slate-200'}
+    var p=h.querySelector('p');if(p)p.textContent='학생 명단 → 원자료 → 초안 → 근거·기재 점검';
+    document.title='Seoteuk Mate v3.9 - 학생부 작성·검토';
+  }
+  [200,900,1800,3200].forEach(function(ms){setTimeout(apply39,ms)});
+})();
+</script>
 </body>
 </html>
